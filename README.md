@@ -225,8 +225,10 @@ VIXULY-Source-code/
 
 ## Authors
 
-- [**@1m4n006292**](https://github.com/<your-github-username>)
-- [**@anhkiethp58-hue**](https://github.com/anhkiethp58-hue)
+| Member | GitHub | Role |
+|--------|--------|------|
+| **1m4n00b6292** | [@<your-github-username>](https://github.com/<your-github-username>) | Hardware and system design: PCB design, schematic, component selection, planning the system function and logic |
+| **depzaineversai** | [@anhkiethp58-hue](https://github.com/anhkiethp58-hue) | Firmware: firmware development and integration |
 
 ## License
 
