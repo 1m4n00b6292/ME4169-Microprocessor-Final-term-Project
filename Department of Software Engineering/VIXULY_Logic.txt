@@ -1,0 +1,14 @@
+*This is the logic for "VI_XU_LY" project. This file include: logic of user button and operation mode:
+There are two buttons on PC1 and PC3, in which PC1 is the "RUN" button, and PC3 is the "STOP" button, two LEDs PC2 and PC4, PC2 is the "RUN" LED, and PC4 is the "STOP" LED
+*Here are the operation modes:
+- STOP
+- RUN using POTENTIOMETER (the system take signal from potentiometer - PC0 as the input to control the speed of the motor)
+- RUN using UART (the system take signal from UART as the input to control motor speed)
+*Here is the logic:
+- STOP Button: short press once to stop the entire system - PIN SLEEP PD4 will be pulled low to deactivate the motor controller IC, output a variable uint8_t running = 1; the system will take this variable as an indicator)
+- RUN Button: 
+	- Short press once to switch from STOP to run (running = 0)
+	- Hold (long press) for about 2s to enter mode selection, while in selection, press to swap between 2 modes, to select the mode, long press again to select the mode
+*LEDs:
+- RUN LED will ONLY turn on (logic high) when the system is running
+- STOP LED will ONLY turn on (logic high) when the system is stopping
