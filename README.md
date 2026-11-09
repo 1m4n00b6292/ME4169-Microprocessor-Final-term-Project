@@ -1,6 +1,6 @@
 # VIXULY-Source-code
 
-This is the Firmware for the final term project of ME4169 - Microprocessor's class of HUST
+This is the final term project of ME4169 - Microprocessor course conducted by HUST
 
 ## Overview
 
