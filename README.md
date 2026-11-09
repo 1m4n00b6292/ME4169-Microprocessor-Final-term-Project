@@ -1,10 +1,10 @@
-# VIXULY-Source-code
+# ME4169 Microprocessor Final term project
 
 This is the final term project of ME4169 - Microprocessor course conducted by HUST
 
 ## Overview
 
-**VI XU LY** is a closed-loop DC motor speed controller built around an **ATmega88PA** running at 16 MHz. The motor speed is measured by a quadrature encoder and regulated by a fixed-point PID controller. The target speed can be set either by a **potentiometer** or by commands sent over **UART**. A small **WeAct ST7735 TFT module** shows the current mode, the system state, the target speed and the measured speed (RPM).
+**ME4169 Microprocessor Final term project**, aka, **VIXULY** is a closed-loop DC motor speed controller built around an **ATmega88PA** running at 16 MHz. The motor speed is measured by a quadrature encoder and regulated by a fixed-point PID controller. The target speed can be set either by a **potentiometer** or by commands sent over **UART**. A small **WeAct ST7735 TFT module** shows the current mode, the system state, the target speed and the measured speed (RPM).
 
 The firmware is written as bare-metal AVR code (direct register access, hand-written ISRs). The Arduino framework is only used for `millis()` and the `setup()`/`loop()` entry points, under PlatformIO.
 
