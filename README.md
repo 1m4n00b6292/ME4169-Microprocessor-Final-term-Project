@@ -8,6 +8,13 @@ This is the final term project of ME4169 - Microprocessor course conducted by HU
 
 The firmware is written as bare-metal AVR code (direct register access, hand-written ISRs). The Arduino framework is only used for `millis()` and the `setup()`/`loop()` entry points, under PlatformIO.
 
+<!-- Fixed width, centered -->
+<p align="center">
+  <img src="Picture/3D_Front.png" width="750" alt="PCB top view">
+  <br>
+  <em>Figure 1: PCB 3D view (top)</em>
+</p>
+
 ## Main Components
 
 ### Hardware
@@ -39,6 +46,13 @@ The firmware is written as bare-metal AVR code (direct register access, hand-wri
 | STOP button / STOP LED | PC3 / PC4 | |
 
 > **JP1** on the board selects the DRV8220 control mode. Keep it **open** for PWM (IN1/IN2) mode (default). If it is soldered, enable `MOTOR_MODE_PH_EN` in `config.h`.
+
+<!-- Fixed width, centered -->
+<p align="center">
+  <img src="Picture/Layout_Front.png" width="750" alt="Layout top view">
+  <br>
+  <em>Figure 2: Layout view (top)</em>
+</p>
 
 ### Software Modules
 
