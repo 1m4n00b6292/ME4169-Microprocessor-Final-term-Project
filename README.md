@@ -100,7 +100,7 @@ The project uses [PlatformIO](https://platformio.org/).
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/<your-username>/VIXULY-Source-code.git
+   git clone https://github.com/1m4n00b6292/VIXULY-Source-code.git
    ```
 2. Open the `Department of Software Engineering` folder in VS Code with the PlatformIO extension.
 3. Review `src/config.h`, especially the items in the **Configuration** section below.
