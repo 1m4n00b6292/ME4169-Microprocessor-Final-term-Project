@@ -241,7 +241,7 @@ VIXULY-Source-code/
 
 | Member | GitHub | Role |
 |--------|--------|------|
-| **1m4n00b6292** | [@1m4n00b6292](https://github.com/1m4n00b6292) | Hardware and system design: PCB design, schematic, component selection, planning the system function and logic |
+| **1m4n00b** | [@1m4n00b6292](https://github.com/1m4n00b6292) | Hardware and system design: PCB design, schematic, component selection, planning the system function and logic |
 | **depzaineversai** | [@anhkiethp58-hue](https://github.com/anhkiethp58-hue) | Firmware: firmware development and integration |
 
 ## License
