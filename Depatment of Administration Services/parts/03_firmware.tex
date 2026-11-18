@@ -1,0 +1,324 @@
+%!TEX root = ./main.tex
+%!TEX program = xelatex
+% =====================================================================
+%  03 - CẤU TRÚC FIRMWARE
+% =====================================================================
+\chapter{Cấu trúc firmware}
+\label{ch:firmware}
+
+\section{Nguyên tắc thiết kế}
+Firmware của \proj{} được viết theo phong cách \textbf{bare-metal}: mọi ngoại vi (Timer, ADC, SPI, USART, ngắt ngoài) đều được cấu hình bằng cách ghi trực tiếp vào thanh ghi, các trình phục vụ ngắt (ISR) được viết tay. Framework Arduino chỉ được dùng cho hai việc: hàm \texttt{millis()} (dựa trên Timer0) và cặp điểm vào \texttt{setup()}/\texttt{loop()} dưới môi trường PlatformIO. Cách tiếp cận này xuất phát từ ba lý do:
+\begin{enumerate}
+  \item \textbf{Bộ nhớ hạn chế:} ATmega88PA chỉ có 8\,KB Flash; riêng thư viện đồ họa Adafruit cho ST7735 đã vượt quá dung lượng này. Nhóm tự viết driver \texttt{st7735\_mini} chỉ hiển thị chữ để vừa bộ nhớ.
+  \item \textbf{Xung đột chân phần cứng:} các chân PWM phần cứng của Timer2 trùng với MOSI (PB3/OC2A) và ENC\_B (PD3/OC2B), nên PWM phải được tạo bằng phần mềm (mục~\ref{sec:swpwm}).
+  \item \textbf{Mục tiêu học tập:} làm chủ cơ chế ngắt, timer và thanh ghi -- nội dung cốt lõi của học phần.
+\end{enumerate}
+Mọi thông số có thể tinh chỉnh (chân, tần số, hệ số PID, giao diện\ldots) được tập trung trong \textbf{một tệp duy nhất} \texttt{config.h}, giúp \proj{} thích ứng với động cơ và encoder khác mà không phải sửa mã nguồn thư viện.
+
+\section{Phân lớp firmware (firmware stack-up)}
+
+Firmware được tổ chức thành các lớp chồng lên nhau (Hình~\ref{fig:stackup}); mỗi lớp chỉ gọi xuống lớp ngay bên dưới, giúp mã dễ đọc, dễ kiểm thử và dễ chuyển sang vi điều khiển khác.
+
+\begin{figure}[H]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  layer/.style={draw=blk,thick,minimum height=11mm,align=center,font=\small},
+  mod/.style={draw=blk,fill=white,rounded corners=2pt,minimum height=8mm,align=center,font=\scriptsize,inner sep=2pt}]
+  \def\W{12}
+  % lớp
+  \node[layer,fill=hustred!15,minimum width=\W cm] (l5) at (0,5.2) {};
+  \node[layer,fill=swfill,minimum width=\W cm] (l4) at (0,3.9) {};
+  \node[layer,fill=blkfill,minimum width=\W cm] (l3) at (0,2.6) {};
+  \node[layer,fill=blkfill!50,minimum width=\W cm,minimum height=14mm] (l2) at (0,1.15) {};
+  \node[layer,fill=iofill,minimum width=\W cm] (l1) at (0,-0.3) {};
+  \node[layer,fill=gray!20,minimum width=\W cm] (l0) at (0,-1.6) {};
+  % nhãn lớp
+  \foreach \l/\t in {l5/Điểm vào,l4/Ứng dụng,l3/Điều khiển,l2/Driver ngoại vi,l1/HAL / thanh ghi AVR,l0/Phần cứng}
+     \node[anchor=east,font=\small\bfseries,text width=2.6cm,align=right] at ([xshift=-2mm]\l.west) {\t};
+  % module
+  \node[mod] at (0,5.2) {main.cpp: setup() $\to$ app\_init(), loop() $\to$ app\_update()};
+  \node[mod,text width=10.5cm] at (0,3.9) {app.cpp -- máy trạng thái STOP/RUN/SELECT, chọn chế độ, LED, ánh xạ tốc độ đặt, hiển thị};
+  \node[mod,text width=10.5cm] at (0,2.6) {motion.c -- PID dấu phẩy tĩnh Q8 + feed-forward + ramp + anti-windup};
+  \node[mod] at (-4.6,1.15) {motor.c\\PWM mềm};
+  \node[mod] at (-2.6,1.15) {encoder\_mini\\giải mã $\times$4};
+  \node[mod] at (-0.65,1.15) {st7735\_mini\\TFT SPI};
+  \node[mod] at (1.2,1.15) {uart.c\\ring buffer};
+  \node[mod] at (2.85,1.15) {button.c\\chống dội};
+  \node[mod] at (4.5,1.15) {adc.c\\10-bit};
+  \node[mod,text width=10.5cm] at (0,-0.3) {<avr/io.h>, <avr/interrupt.h>, ISR, Timer0 (millis), Timer1, Timer2, SPI, USART0, ADC, GPIO};
+  \node[font=\small] at (0,-1.6) {ATmega88PA \quad DRV8220 \quad Encoder \quad TFT \quad Nút/LED \quad Chiết áp};
+  % config.h
+  \node[draw=hustred,very thick,fill=hustred!8,minimum width=7.6cm,minimum height=0.9cm,align=center,font=\small,rotate=90] at (6.65,1.8) {\texttt{config.h} -- toàn bộ thông số cấu hình};
+\end{tikzpicture}}
+\caption{Phân lớp firmware \proj}
+\label{fig:stackup}
+\end{figure}
+
+\begin{table}[H]
+\centering\small
+\caption{Các module firmware}
+\label{tab:modules}
+\begin{tabularx}{\linewidth}{@{}l>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Tệp} & \textbf{Chức năng}\\
+\midrule
+\texttt{main.cpp} & Điểm vào, chỉ gọi \texttt{app\_init()} và \texttt{app\_update()}\\
+\texttt{app.cpp/.h} & Lớp ứng dụng: máy trạng thái, chọn chế độ, LED, cập nhật màn hình (hiện thực đặc tả logic nút nhấn)\\
+\texttt{config.h} & Tệp cấu hình duy nhất: chân, TFT, ADC, encoder, động cơ, hệ số PID, thời gian nút nhấn, bố cục giao diện\\
+\texttt{motion.c/.h} & Bộ điều khiển vận tốc PID dấu phẩy tĩnh Q8, có bù thuận, giới hạn gia tốc, chống bão hòa tích phân, lọc khâu D\\
+\texttt{motor.c/.h} & Driver DRV8220, PWM mềm bằng ngắt Timer2 (không đụng tới Timer0/\texttt{millis()})\\
+\texttt{encoder\_mini.cpp/.h} & Giải mã encoder cầu phương $\times4$, bộ lọc số kiểu STM32 (Timer1), tính vận tốc và RPM\\
+\texttt{button.c/.h} & Nút nhấn có chống dội, phát hiện nhấn ngắn / nhấn giữ\\
+\texttt{uart.c/.h} & Nhận UART bằng ngắt, bộ đệm vòng 32 byte, bộ phân tích số nguyên ASCII\\
+\texttt{adc.c/.h} & Driver ADC 10-bit tối giản\\
+\texttt{st7735\_mini.c/.h} & Driver TFT ST7735 rút gọn, chỉ hiển thị chữ, font lưu trong Flash (PROGMEM)\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Tài nguyên phần cứng và ngắt}
+
+\begin{table}[H]
+\centering\small
+\caption{Phân bổ timer và ngắt}
+\label{tab:interrupts}
+\begin{tabularx}{\linewidth}{@{}lll>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Ngoại vi} & \textbf{Vector ngắt} & \textbf{Tần suất} & \textbf{Nhiệm vụ}\\
+\midrule
+Timer0 & \texttt{TIMER0\_OVF} & \SI{976}{\hertz} & \texttt{millis()} của Arduino -- cơ sở thời gian toàn hệ thống\\
+Timer1 (CTC) & \texttt{TIMER1\_COMPA} & \SI{80}{\kilo\hertz} & Lấy mẫu và lọc số kênh A/B encoder, đếm xung\\
+Timer2 (Fast PWM) & \texttt{TIMER2\_OVF} & \SI{1953}{\hertz} & Bắt đầu chu kỳ PWM: đặt mức cao các chân đang băm xung\\
+ & \texttt{TIMER2\_COMPA/B} & \SI{1953}{\hertz} & Kết thúc độ rộng xung trên IN1 (PD5) / IN2 (PD6)\\
+USART0 & \texttt{USART\_RX} & theo dữ liệu & Đưa byte nhận được vào bộ đệm vòng\\
+SPI & -- (polling) & -- & Gửi dữ liệu tới TFT tại \SI{8}{\mega\hertz}\\
+ADC & -- (polling) & -- & Đọc chiết áp, xung nhịp ADC \SI{125}{\kilo\hertz}\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Với cấu hình mặc định, ISR của Timer1 chạy mỗi $16\,000\,000/80\,000=200$ chu kỳ máy. Nếu mỗi lần thực thi tốn khoảng 60--80 chu kỳ (bao gồm lưu/khôi phục ngữ cảnh), riêng bộ lọc encoder đã chiếm khoảng 30--40\,\% thời gian CPU. Đây là cái giá của việc lọc nhiễu bằng phần mềm trên một vi điều khiển không có khối giải mã encoder phần cứng, và là một trong những lý do nâng cấp lên \projpro{} (Chương~\ref{ch:ketluan}).
+
+\section{Logic hoạt động}
+
+\subsection{Máy trạng thái}
+Hệ thống có ba trạng thái người dùng nhìn thấy: \textbf{STOP}, \textbf{RUN} và \textbf{SELECT} (chọn chế độ), cùng hai chế độ đặt tốc độ: \textbf{POTENTIOMETER} và \textbf{UART}. Biến toàn cục \texttt{running} bằng 1 khi hệ thống đang chạy và bằng 0 trong các trường hợp còn lại.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  state/.style={circle,draw=blk,very thick,fill=blkfill,minimum size=22mm,align=center,font=\small\bfseries},
+  ar/.style={-{Stealth[length=3mm]},thick},
+  lb/.style={font=\scriptsize,align=center,fill=white,inner sep=1pt}]
+  \node[state,fill=hustred!15,draw=hustred] (stop) at (0,0) {STOP\\[-2pt]\tiny LED STOP};
+  \node[state,fill=iofill,draw=green!40!black] (run) at (6.5,0) {RUN\\[-2pt]\tiny LED RUN};
+  \node[state,fill=swfill,draw=orange!80!black] (sel) at (0,-4.6) {SELECT\\[-2pt]\tiny LED STOP};
+  \draw[ar] (-2.3,1.6) node[above,font=\scriptsize]{Cấp nguồn} -- (stop);
+  \draw[ar] (stop) to[bend left=18] node[lb,above]{RUN nhấn ngắn\\ \texttt{motor\_enable(1)}, \texttt{motion\_start()}} (run);
+  \draw[ar] (run) to[bend left=18] node[lb,below]{STOP nhấn\\ \texttt{motion\_stop()}, nSLEEP = 0} (stop);
+  \draw[ar] (stop) to[bend right=25] node[lb,left]{RUN giữ 2\,s} (sel);
+  \draw[ar] (sel) to[bend right=25] node[lb,right]{RUN giữ 2\,s\\(xác nhận chế độ)\\hoặc STOP (hủy)} (stop);
+  \draw[ar] (sel) edge[loop below,looseness=5] node[lb,below]{RUN nhấn ngắn: đổi POT $\leftrightarrow$ UART} (sel);
+  \draw[ar] (run) edge[loop right,looseness=5] node[lb,right]{RUN: bỏ qua} (run);
+\end{tikzpicture}
+\caption{Máy trạng thái của \proj}
+\label{fig:fsm}
+\end{figure}
+
+\begin{table}[H]
+\centering\small
+\caption{Bảng logic nút nhấn}
+\label{tab:buttonlogic}
+\begin{tabularx}{\linewidth}{@{}llll>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Nút} & \textbf{TT hiện tại} & \textbf{Thao tác} & \textbf{TT mới} & \textbf{Kết quả}\\
+\midrule
+STOP & bất kỳ & Nhấn & STOP & Kéo PD4 (nSLEEP) xuống thấp, reset PID, hủy chọn chế độ dang dở\\
+RUN & STOP & Nhấn ngắn & RUN & Chạy ở chế độ hiện hành\\
+RUN & STOP & Giữ $\approx$\SI{2}{\second} & SELECT & Vào chế độ chọn\\
+RUN & SELECT & Nhấn ngắn & SELECT & Đổi giữa POTENTIOMETER và UART\\
+RUN & SELECT & Giữ $\approx$\SI{2}{\second} & STOP & Xác nhận chế độ đang hiển thị\\
+RUN & RUN & bất kỳ & RUN & Bỏ qua\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Nút STOP luôn có \textbf{quyền ưu tiên cao nhất}: trong hàm \texttt{handleButtons()}, sự kiện của nút STOP được xử lý trước và kết thúc hàm ngay lập tức, đảm bảo động cơ luôn có thể được dừng an toàn bất kể hệ thống đang ở trạng thái nào.
+
+\subsection{Vòng lặp chính (super-loop)}
+\proj{} không dùng hệ điều hành thời gian thực mà dùng kiến trúc \emph{super-loop} kết hợp ngắt: các tác vụ có yêu cầu thời gian khắt khe (đếm encoder, PWM, nhận UART) chạy trong ISR; các tác vụ còn lại chạy tuần tự trong \texttt{app\_update()} và tự định thời bằng \texttt{millis()} (không dùng \texttt{delay()} chặn).
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=5mm,
+  proc/.style={draw=blk,thick,fill=blkfill,rounded corners=2pt,minimum width=56mm,minimum height=8mm,align=center,font=\small},
+  dec/.style={draw=blk,thick,fill=swfill,diamond,aspect=2.6,inner sep=1pt,align=center,font=\scriptsize},
+  term/.style={draw=blk,thick,fill=hustred!15,rounded rectangle,minimum width=30mm,minimum height=8mm,font=\small},
+  ar/.style={-{Stealth[length=2.5mm]},thick}]
+  \node[term] (s) {Bắt đầu};
+  \node[proc,below=of s] (init) {\texttt{app\_init()}: GPIO, TFT, ADC, UART,\\encoder, motor, PID $\to$ trạng thái STOP};
+  \node[proc,below=7mm of init] (btn) {\texttt{handleButtons()}: cập nhật máy trạng thái};
+  \node[proc,below=of btn] (vel) {\texttt{updateVelocity()}: mỗi \SI{50}{\milli\second} tính RPM từ encoder};
+  \node[proc,below=of vel] (tgt) {\texttt{updateTarget()}: đọc chiết áp hoặc UART\\$\to$ tốc độ đặt (chỉ khi RUN)};
+  \node[dec,below=of tgt] (dt) {Đủ \SI{50}{\milli\second}\\và đang RUN?};
+  \node[proc,below=6mm of dt] (pid) {\texttt{motion\_update()}: ramp $\to$ PID + FF\\$\to$ \texttt{motor\_set(duty)}};
+  \node[proc,below=of pid] (disp) {\texttt{drawMode/State()}; mỗi \SI{100}{\milli\second} \texttt{drawVelocity()}};
+  \draw[ar] (s) -- (init); \draw[ar] (init) -- (btn); \draw[ar] (btn) -- (vel); \draw[ar] (vel) -- (tgt);
+  \draw[ar] (tgt) -- (dt); \draw[ar] (dt) -- node[right,font=\scriptsize]{Đúng} (pid); \draw[ar] (pid) -- (disp);
+  \draw[ar] (dt.east) -- ++(2.4,0) node[above,font=\scriptsize,pos=0.4]{Sai} |- (disp.east);
+  \draw[ar] (disp.west) -- ++(-1.2,0) |- (btn.west);
+  % ISR song song
+  \node[draw=hustred,dashed,thick,fill=hustred!5,align=left,font=\scriptsize,right=16mm of vel,text width=40mm] (isr) {\textbf{Chạy song song bằng ngắt}\\[2pt]
+   \texttt{TIMER1\_COMPA}: lọc + đếm encoder\\ \texttt{TIMER2\_OVF/COMPA/COMPB}: PWM\\ \texttt{USART\_RX}: bộ đệm vòng\\ \texttt{TIMER0\_OVF}: \texttt{millis()}};
+\end{tikzpicture}
+\caption{Lưu đồ vòng lặp chính}
+\label{fig:mainloop}
+\end{figure}
+
+\section{Sơ đồ khối firmware và luồng dữ liệu}
+
+Hình~\ref{fig:fwblock} thể hiện luồng dữ liệu của vòng điều khiển từ đầu vào người dùng tới động cơ và ngược lại.
+
+\begin{figure}[H]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  node distance=6mm and 7mm,
+  b/.style={draw=blk,thick,fill=blkfill,rounded corners=2pt,minimum height=12mm,align=center,font=\small},
+  hw/.style={draw,dashed,rounded corners=2pt,minimum height=12mm,align=center,font=\small},
+  sum/.style={circle,draw=blk,thick,minimum size=6mm,inner sep=0},
+  ar/.style={-{Stealth[length=2.5mm]},thick},
+  lb/.style={font=\scriptsize,above}]
+  \node[hw] (pot) {Chiết áp\\ADC0};
+  \node[hw,below=of pot] (ua) {UART\\``-255..255\textbackslash n''};
+  \node[b,right=of pot,yshift=-9mm] (map) {Ánh xạ\\$[-255,255]$\\$\to\pm2700$ rpm};
+  \node[b,right=of map] (ramp) {Giới hạn\\gia tốc\\6000 rpm/s};
+  \node[sum,right=of ramp] (s1) {};
+  \node[b,right=of s1] (pid) {PID Q8\\$K_p, K_i, K_d$};
+  \node[b,above=of pid] (ff) {Bù thuận\\$K_{ff}\cdot r$};
+  \node[sum,right=of pid] (s2) {};
+  \node[b,right=of s2] (sat) {Bão hòa\\$\pm255$ +\\anti-windup};
+  \node[b,right=of sat] (pwm) {PWM mềm\\Timer2\\1,95\,kHz};
+  \node[hw,right=of pwm] (drv) {DRV8220\\+ động cơ};
+  \node[b,below=14mm of sat] (enc) {Giải mã $\times4$\\lọc số\\Timer1 80\,kHz};
+  \node[b,left=of enc] (rpm) {Tính RPM\\cửa sổ 50\,ms};
+  \node[hw,right=of enc] (encph) {Encoder\\A/B};
+  \draw[ar] (pot) -| ([xshift=-3mm]map.west) -- (map.west);
+  \draw[ar] (ua) -| ([xshift=-3mm]map.west);
+  \draw[ar] (map) -- (ramp); \draw[ar] (ramp) -- node[lb]{$r$} (s1);
+  \draw[ar] (s1) -- node[lb]{$e$} (pid); \draw[ar] (pid) -- (s2); \draw[ar] (s2) -- (sat);
+  \draw[ar] (ramp.north) |- (ff.west); \draw[ar] (ff.east) -| (s2.north);
+  \draw[ar] (sat) -- node[lb]{duty} (pwm); \draw[ar] (pwm) -- node[lb]{IN1/IN2} (drv);
+  \draw[ar] (drv) |- (encph.north) ; \draw[ar] (encph) -- (enc); \draw[ar] (enc) -- node[lb]{đếm} (rpm);
+  \draw[ar] (rpm.west) -| node[pos=0.9,left,font=\scriptsize]{$-$} node[pos=0.5,below,font=\scriptsize]{$y$ (rpm)} (s1.south);
+  \draw[ar] (rpm.south) -- ++(0,-6mm) node[below,font=\scriptsize]{TFT: Velocity / Target};
+  \node[font=\scriptsize] at ([xshift=-2mm,yshift=2mm]s1.north west) {$+$};
+\end{tikzpicture}}
+\caption{Sơ đồ khối firmware -- luồng dữ liệu vòng điều khiển}
+\label{fig:fwblock}
+\end{figure}
+
+\section{Các thuật toán chính}
+
+\subsection{PWM mềm trên Timer2}
+\label{sec:swpwm}
+Hai chân điều khiển IN1/IN2 của DRV8220 nối với PD5 và PD6. Trên ATmega88PA, đây là các chân OC0B/OC0A của \emph{Timer0} -- vốn đã được Arduino dùng cho \texttt{millis()}. Còn các chân ra so sánh của Timer2 (OC2A = PB3, OC2B = PD3) lại trùng với MOSI và ENC\_B. Do đó, firmware dùng Timer2 ở chế độ Fast PWM nhưng \emph{ngắt kết nối} khối so sánh khỏi chân (COM2x = 0) và tạo xung bằng ngắt:
+\begin{itemize}
+  \item \texttt{TIMER2\_OVF}: đầu mỗi chu kỳ, đặt mức cao cho các chân đang băm xung (mặt nạ \texttt{s\_mask});
+  \item \texttt{TIMER2\_COMPA} / \texttt{TIMER2\_COMPB}: khi bộ đếm bằng \texttt{OCR2A}/\texttt{OCR2B}, kéo IN1/IN2 xuống thấp.
+\end{itemize}
+Tần số PWM:
+\begin{equation}
+  f_{PWM}=\frac{f_{CPU}}{N\cdot256}=\frac{16\,000\,000}{32\times256}\approx\SI{1953}{\hertz}.
+\end{equation}
+Khi độ rộng xung bằng 0 hoặc 255, ngắt so sánh được tắt và chân được giữ ở mức cố định để tránh xung nhiễu. Do độ trễ đáp ứng ngắt (vài \si{\micro\second}), độ rộng xung nhỏ nhất thực tế khoảng 2\,\%.
+
+Ở chế độ IN1/IN2, firmware dùng kiểu \textbf{suy giảm chậm} (slow decay): một chân giữ mức cao, chân còn lại băm xung với độ rộng đảo $255-|d|$. Trong thời gian ``tắt'', cả hai đầu vào ở mức cao làm cầu H ở trạng thái hãm (brake), dòng động cơ tuần hoàn qua hai MOSFET phía thấp, giúp quan hệ giữa độ rộng xung và tốc độ tuyến tính hơn so với kiểu ``thả trôi'' (coast).
+
+\subsection{Giải mã encoder bằng bảng tra}
+Trạng thái hai kênh được mã hóa thành 2 bit $s=(A\ll1)\,|\,B$. Mỗi khi có thay đổi, chỉ số bảng tra $k=(s_{\text{cũ}}\ll2)\,|\,s_{\text{mới}}$ (0--15) cho ra $+1$, $-1$ hoặc $0$ (chuyển trạng thái không hợp lệ bị bỏ qua). Bảng 16 phần tử được lưu trong Flash (\texttt{PROGMEM}). Cách làm này đếm được cả 4 sườn của mỗi chu kỳ xung ($\times4$) và tự xác định chiều quay.
+
+\subsection{Bộ lọc nhiễu encoder kiểu STM32}
+Khi \texttt{ENC\_FILTER\_N} $>1$, encoder không dùng ngắt ngoài INT0/INT1 mà được Timer1 (chế độ CTC) lấy mẫu ở \SI{80}{\kilo\hertz}. Một kênh chỉ được công nhận đổi mức khi có $N=4$ mẫu liên tiếp cùng mức mới, tương tự bộ lọc đầu vào ICxF của STM32. Các xung nhiễu ngắn hơn
+\begin{equation}
+  t_{min}=\frac{N}{f_s}=\frac{4}{80\,000}=\SI{50}{\micro\second}
+\end{equation}
+sẽ bị loại bỏ. Phần tính toán chi tiết về giới hạn tốc độ được trình bày ở mục~\ref{sec:encoder}.
+
+\subsection{Bộ điều khiển PID dấu phẩy tĩnh}
+ATmega88PA không có bộ xử lý số thực (FPU); phép toán \texttt{float} được giả lập bằng phần mềm, chậm và tốn Flash. Vì vậy, các hệ số PID được biểu diễn ở dạng dấu phẩy tĩnh \textbf{Q8} (nhân với 256), chuyển đổi lúc biên dịch bằng macro \texttt{MOTION\_GAIN(x)}. Thuật toán đầy đủ và cách chọn hệ số được trình bày ở mục~\ref{sec:pid}.
+
+\subsection{Nhận lệnh UART}
+Ngắt \texttt{USART\_RX} chỉ làm một việc: chép byte vào bộ đệm vòng 32 byte. Hàm \texttt{uart\_poll\_int()} trong vòng lặp chính lấy từng ký tự ra, tích lũy chữ số, nhận dấu `\texttt{-}' ở đầu, và trả về một số nguyên khi gặp `\texttt{\textbackslash n}' hoặc `\texttt{\textbackslash r}'. Trạng thái bộ phân tích được giữ giữa các lần gọi nên một dòng lệnh có thể đến rời rạc. Tốc độ baud dùng chế độ U2X:
+\begin{equation}
+  UBRR=\frac{f_{CPU}}{8\cdot\text{baud}}-1=\frac{16\cdot10^6}{8\times115200}-1\approx16,\qquad
+  \text{baud}_{\text{thực}}=\frac{16\cdot10^6}{8\times17}=117\,647\ (+2{,}1\,\%).
+\end{equation}
+
+\section{Nạp chương trình và gỡ lỗi với PlatformIO}
+
+\subsection{Môi trường phát triển}
+Firmware được phát triển trên \textbf{Visual Studio Code + PlatformIO}. Cấu hình dự án (\texttt{platformio.ini}):
+\begin{lstlisting}[language={},caption={Tệp cấu hình platformio.ini},label={lst:pio}]
+[env:ATmega88P]
+platform  = atmelavr
+board     = ATmega88P
+framework = arduino
+
+upload_protocol = custom
+upload_port     = COM10
+upload_command  = avrdude -C "$PROJECT_PACKAGES_DIR/tool-avrdude/avrdude.conf" -v -p m88p -c avrisp -P $UPLOAD_PORT -b 19200 -U flash:w:$SOURCE:i
+\end{lstlisting}
+\texttt{upload\_protocol = custom} cho phép gọi trực tiếp \texttt{avrdude} với lập trình viên \texttt{avrisp} (giao thức STK500v1 của sketch \emph{ArduinoISP}) ở tốc độ \SI{19200}{baud}.
+
+\subsection{Mạch nạp: Arduino Nano làm ISP qua SPI}
+\proj{} không có bootloader và không có chip USB--UART trên bo; chương trình được nạp qua giao tiếp \textbf{ISP} (In-System Programming) dựa trên SPI. Nhóm sử dụng một \textbf{Arduino Nano} nạp sẵn sketch \emph{ArduinoISP} (File $\to$ Examples $\to$ 11.ArduinoISP) làm mạch nạp.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  pin/.style={font=\scriptsize\ttfamily,anchor=west},
+  ar/.style={thick}]
+  \node[draw=blk,very thick,fill=blkfill,minimum width=32mm,minimum height=46mm,align=center] (nano) at (0,0) {};
+  \node[font=\small\bfseries,above] at (nano.north) {Arduino Nano (ArduinoISP)};
+  \node[draw=hustred,very thick,fill=pwrfill,minimum width=32mm,minimum height=46mm] (ud) at (8,0) {};
+  \node[font=\small\bfseries,above] at (ud.north) {\proj{} -- J6};
+  \foreach \i/\a/\b/\c in {1/D10/RESET/hustred,2/D11 (MOSI)/MOSI/blue,3/D12 (MISO)/MISO/green!50!black,4/D13 (SCK)/SCK/orange,5/GND/GND/black}{
+    \node[pin] (n\i) at ($(nano.north west)+(0.15,-0.75*\i)$) {\a};
+    \node[pin,anchor=east] (u\i) at ($(ud.north east)+(-0.15,-0.75*\i)$) {\i\ -- \b};
+    \draw[ar,\c] ($(nano.north east)+(0,-0.75*\i)$) -- ($(ud.north west)+(0,-0.75*\i)$);
+  }
+  \node[draw,fill=white,font=\scriptsize,align=center] at ($(nano.south)+(0,0.6)$) {Tụ \SI{10}{\micro\farad}\\RESET--GND};
+  \node[font=\scriptsize,align=center] at ($(nano.south)+(0,-0.5)$) {USB $\to$ PC (COM10)};
+  \node[font=\scriptsize,align=center] at ($(ud.south)+(0,-0.5)$) {Cấp nguồn \SI{12}{\volt} qua J1\\(J6 không có chân nguồn)};
+\end{tikzpicture}
+\caption{Kết nối Arduino Nano làm mạch nạp ISP}
+\label{fig:isp}
+\end{figure}
+
+\begin{ghichu}[Lưu ý khi nạp]
+\begin{itemize}[leftmargin=*]
+  \item Đầu nối J6 \textbf{không có chân cấp nguồn}, vì vậy bo \proj{} phải được cấp nguồn \SI{12}{\volt} qua J1 trong khi nạp (GND chung với Arduino Nano qua chân 5 của J6).
+  \item Gắn tụ \SI{10}{\micro\farad} giữa RESET và GND của Arduino Nano \emph{sau khi} đã nạp sketch ArduinoISP, để Nano không tự reset khi \texttt{avrdude} mở cổng COM.
+  \item Chip ATmega88PA mới xuất xưởng chạy bằng dao động RC nội \SI{1}{\mega\hertz} (CKDIV8). Trước lần nạp đầu tiên cần ghi fuse để chuyển sang thạch anh ngoài \SI{16}{\mega\hertz}:\\
+  \texttt{avrdude -p m88p -c avrisp -P COM10 -b 19200 -U lfuse:w:0xFF:m -U hfuse:w:0xDF:m -U efuse:w:0xF9:m}\\
+  \bosung{xác nhận giá trị fuse nhóm đã dùng}
+\end{itemize}
+\end{ghichu}
+
+\subsection{Quy trình build -- nạp -- gỡ lỗi}
+\begin{enumerate}
+  \item \textbf{Build} (\texttt{pio run} hoặc nút \checkmark{} trên thanh trạng thái): PlatformIO biên dịch bằng \texttt{avr-gcc} và in ra mức sử dụng bộ nhớ \texttt{RAM: \ldots\% Flash: \ldots\%} -- chỉ số quan trọng nhất với chip 8\,KB. \bosung{dán kết quả RAM/Flash thực tế}
+  \item \textbf{Upload} (\texttt{pio run -t upload} hoặc nút $\rightarrow$): gọi \texttt{avrdude} qua Arduino Nano; avrdude tự đọc lại (verify) sau khi ghi.
+  \item \textbf{Kiểm tra UART}: mở \emph{Serial Monitor} của PlatformIO (\texttt{pio device monitor -b 115200}) bằng một mạch USB--UART nối vào J3, gõ lệnh tốc độ (ví dụ \texttt{200}) và quan sát giá trị \texttt{Target} trên TFT.
+\end{enumerate}
+
+Do Arduino Nano/ArduinoISP chỉ có chức năng \emph{nạp} (không hỗ trợ debugWIRE để đặt breakpoint), nhóm áp dụng các kỹ thuật gỡ lỗi sau:
+\begin{itemize}
+  \item \textbf{Màn hình TFT làm cửa sổ quan sát:} tốc độ đo, tốc độ đặt, chế độ và trạng thái được hiển thị liên tục, thay thế cho \texttt{Serial.print()} (cổng TX không được dùng).
+  \item \textbf{Chế độ vòng hở} \texttt{APP\_OPEN\_LOOP = 1}: tốc độ đặt được đưa thẳng ra PWM, bỏ qua PID -- dùng để kiểm tra riêng phần cứng (chiết áp, cầu H, động cơ, encoder) trước khi đóng vòng.
+  \item \textbf{Máy hiện sóng tại các test point}: TP4/TP5 (encoder), chân IN1/IN2 (PWM), các ray nguồn TP1--TP3, TP6 (Chương~\ref{ch:lapdat}).
+  \item \textbf{Kiểm thử trên máy tính (host test):} các module logic như nút nhấn và ứng dụng được biên dịch cho máy tính với các tệp giả lập thanh ghi AVR (\texttt{mock\_avr}), chạy các ca kiểm thử tự động; đồng thời một bước ``smoke test'' biên dịch và liên kết toàn bộ firmware cho \texttt{atmega88pa} mà không cần nạp vào bo.
+\end{itemize}

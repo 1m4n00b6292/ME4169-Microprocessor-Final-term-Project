@@ -1,0 +1,374 @@
+%!TEX root = ./main.tex
+%!TEX program = xelatex
+% =====================================================================
+%  04 - LẮP RÁP, ĐO KIỂM VÀ VẬN HÀNH
+% =====================================================================
+\chapter{Lắp ráp, đo kiểm và vận hành}
+\label{ch:lapdat}
+
+\section{Lắp ráp bo mạch}
+Bo mạch được lắp ráp và kiểm tra theo từng khối, từ nguồn tới tải, để nếu có lỗi thì khoanh vùng được ngay và không làm hỏng các linh kiện đắt tiền:
+\begin{enumerate}
+  \item \textbf{Khối bảo vệ và nguồn:} hàn J1, Q1, D1, R2, U1, L2, các tụ và cầu phân áp R5/R7, U3. Cấp \SI{12}{\volt} qua nguồn có giới hạn dòng (\SI{100}{\milli\ampere}), kiểm tra các ray nguồn và thử cắm ngược cực.
+  \item \textbf{Khối vi điều khiển:} hàn U2, Y1, các tụ thoát, mạch reset, J6. Ghi fuse và nạp một chương trình nháy LED để xác nhận MCU chạy đúng \SI{16}{\mega\hertz}.
+  \item \textbf{Khối giao diện:} U4, J2, nút nhấn, LED, chiết áp; cắm màn hình và kiểm tra hiển thị.
+  \item \textbf{Khối công suất:} U5, tụ VM, M1. Chạy thử ở chế độ vòng hở (\texttt{APP\_OPEN\_LOOP = 1}).
+  \item \textbf{Tích hợp:} nối encoder, nạp firmware vòng kín và tinh chỉnh PID.
+\end{enumerate}
+
+\begin{table}[H]
+\centering\small
+\caption{Kết quả kiểm tra các ray nguồn ($V_{IN}=\SI{12}{\volt}$)}
+\label{tab:rails}
+\begin{tabular}{@{}llccc@{}}
+\toprule
+\textbf{Điểm đo} & \textbf{Ray} & \textbf{Lý thuyết} & \textbf{Đo được} & \textbf{Gợn sóng (p-p)}\\
+\midrule
+TP2 & +12V (sau chống ngược cực) & $\approx\SI{12.0}{\volt}$ & \bosung{} & \bosung{}\\
+TP3 & +5V & \SI{4.98}{\volt} & \bosung{} & \bosung{}\\
+TP1 & +5VA (AVCC) & \SI{4.98}{\volt} & \bosung{} & \bosung{}\\
+TP6 & +3.3V & \SI{3.30}{\volt} & \bosung{} & \bosung{}\\
+TP7 & OE (TXB0106) & \SI{3.34}{\volt} & \bosung{} & --\\
+-- & Thử cắm ngược cực & Không hỏng & \bosung{} & --\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Đo tín hiệu bằng máy hiện sóng}
+\label{sec:oscillo}
+Các phép đo được thực hiện bằng máy hiện sóng \bosung{hãng, model, băng thông} với que đo $\times10$, mass que đo nối vào lỗ bắt vít (GND) gần điểm đo nhất.
+
+\subsection{Tín hiệu PWM điều khiển cầu H}
+Đo tại chân IN1 (PD5) và IN2 (PD6). Kết quả kỳ vọng: tần số \SI{1953}{\hertz} (chu kỳ \SI{512}{\micro\second}); một chân ở mức cao cố định, chân còn lại băm xung với độ rộng mức thấp tỉ lệ với tốc độ (slow decay); khi đảo chiều quay, vai trò hai chân đổi cho nhau.
+
+\begin{figure}[H]
+\centering
+\hinh[0.8\linewidth]{figures/osc_pwm.png}{Ảnh máy hiện sóng: IN1 (CH1) và IN2 (CH2), đo tần số và độ rộng xung}
+\caption{Tín hiệu PWM tại IN1/IN2 của DRV8220}
+\label{fig:osc_pwm}
+\end{figure}
+
+\subsection{Tín hiệu encoder}
+Đo đồng thời TP4 (ENC\_A) và TP5 (ENC\_B). Hai kênh phải là xung vuông lệch pha \ang{90} (cầu phương); kênh nào sớm pha hơn cho biết chiều quay. Dạng sóng lý tưởng được minh họa ở Hình~\ref{fig:quad}.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=0.55cm,y=0.6cm,thick]
+  \draw[->,gray] (0,-0.4) -- (22.5,-0.4) node[right,font=\scriptsize]{$t$};
+  \node[left,font=\small] at (0,2.9) {A};
+  \node[left,font=\small] at (0,0.6) {B};
+  \draw[blk] (0,2.4) -- (1,2.4) \foreach \x in {1,5,9,13,17}{ -- (\x,2.4) -- (\x,3.4) -- (\x+2,3.4) -- (\x+2,2.4)} -- (22,2.4);
+  \draw[hustred] (0,0.1) -- (2,0.1) \foreach \x in {2,6,10,14,18}{ -- (\x,0.1) -- (\x,1.1) -- (\x+2,1.1) -- (\x+2,0.1)} -- (22,0.1);
+  \foreach \x in {1,2,3,4,5}{\draw[gray!60,dashed,thin] (\x,-0.4) -- (\x,3.8);}
+  \foreach \x/\s in {0.5/00,1.5/10,2.5/11,3.5/01,4.5/00}{\node[font=\tiny] at (\x,4.05) {\s};}
+  \draw[decorate,decoration={brace,amplitude=4pt,mirror}] (1,-0.7) -- (5,-0.7) node[midway,below=3pt,font=\scriptsize]{1 chu kỳ = 4 đếm ($\times4$)};
+  \node[font=\scriptsize,align=left,anchor=west] at (14,4.4) {A sớm pha \ang{90} so với B\\$\Rightarrow$ một chiều quay};
+\end{tikzpicture}
+\caption{Dạng sóng encoder cầu phương lý tưởng và 4 trạng thái (A,B) trong một chu kỳ}
+\label{fig:quad}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\hinh[0.8\linewidth]{figures/osc_encoder.png}{Ảnh máy hiện sóng: ENC\_A (TP4) và ENC\_B (TP5) khi động cơ quay ổn định; ghi tần số kênh A}
+\caption{Tín hiệu encoder đo thực tế}
+\label{fig:osc_enc}
+\end{figure}
+
+\subsection{Các tín hiệu khác}
+\begin{itemize}
+  \item \textbf{Gợn sóng ray +5V} tại TP3 (chế độ AC coupling, giới hạn băng thông \SI{20}{\mega\hertz}): kỳ vọng thấy thành phần \SI{500}{\kilo\hertz} của buck.
+  \item \textbf{Khung UART} tại chân RX (J3): 1 bit start, 8 bit dữ liệu, 1 bit stop; độ rộng 1 bit $\approx\SI{8.7}{\micro\second}$ ở \SI{115200}{baud}.
+  \item \textbf{SPI tới TFT} tại đầu ra TXB0106: xung SCK \SI{8}{\mega\hertz}, biên độ \SI{3.3}{\volt}.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.49\linewidth}\centering\hinh[\linewidth]{figures/osc_ripple.png}{Gợn sóng ray +5V}\caption{Gợn sóng ray +5V}\end{subfigure}\hfill
+\begin{subfigure}{0.49\linewidth}\centering\hinh[\linewidth]{figures/osc_uart.png}{Khung UART khi gửi ``200\textbackslash n''}\caption{Khung UART}\end{subfigure}
+\caption{Đo gợn sóng nguồn và tín hiệu UART}
+\label{fig:osc_other}
+\end{figure}
+
+\section{Tính toán encoder}
+\label{sec:encoder}
+
+\subsection{Độ phân giải và công thức tính tốc độ}
+Encoder có $PPR=20$ xung/vòng mỗi kênh. Với giải mã $\times4$, số đếm mỗi vòng:
+\begin{equation}
+  CPR = 4\cdot PPR = 4\times20 = 80 \ \text{đếm/vòng}.
+\end{equation}
+Firmware đo tốc độ theo phương pháp \textbf{đếm xung trong cửa sổ thời gian cố định} (phương pháp M) với $T_w=\SI{50}{\milli\second}$. Gọi $\Delta N$ là số đếm thay đổi trong cửa sổ, $\Delta t$ là thời gian thực của cửa sổ (ms):
+\begin{equation}
+  v = \frac{\Delta N\cdot1000}{\Delta t}\ \ [\text{đếm/s}],\qquad
+  n = \frac{60\,v}{CPR}\ \ [\text{rpm}].
+\end{equation}
+Độ phân giải tốc độ (ứng với $\Delta N=1$):
+\begin{equation}
+  \Delta n_{min}=\frac{60}{CPR\cdot T_w}=\frac{60}{80\times0{,}05}=\SI{15}{rpm}.
+\end{equation}
+
+\subsection{Tần số tín hiệu và giới hạn tốc độ}
+Ở tốc độ đặt lớn nhất $n_{max}=\SI{2700}{rpm}$:
+\begin{align}
+  f_A &= \frac{n_{max}}{60}\cdot PPR = \frac{2700}{60}\times20 = \SI{900}{\hertz},\\
+  v_{max} &= \frac{n_{max}}{60}\cdot CPR = 45\times80 = 3600\ \text{đếm/s}\ \Rightarrow\ \Delta N = 180\ \text{đếm/cửa sổ}.
+\end{align}
+Khoảng cách giữa hai sườn liên tiếp (của A hoặc B) là $1/3600\approx\SI{278}{\micro\second}$, lớn hơn nhiều so với độ trễ lọc $\SI{50}{\micro\second}$. Giới hạn lý thuyết của bộ lọc ($N=4$, $f_s=\SI{80}{\kilo\hertz}$) là một sườn mỗi \SI{50}{\micro\second}, tức $20\,000$ đếm/s:
+\begin{equation}
+  n_{lim}=\frac{20\,000\times60}{80}=\SI{15000}{rpm},
+\end{equation}
+đủ dư cho động cơ đang dùng. Để giữ an toàn, nên dùng tối đa khoảng 50\,\% giới hạn này.
+
+\begin{table}[H]
+\centering\small
+\caption{Thông số encoder theo tốc độ ($PPR=20$, $T_w=\SI{50}{\milli\second}$)}
+\label{tab:encoder}
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+\textbf{Tốc độ (rpm)} & \textbf{$f_A$ (Hz)} & \textbf{Đếm/s} & \textbf{$\Delta N$ / cửa sổ} & \textbf{Sai số lượng tử}\\
+\midrule
+150 & 50 & 200 & 10 & $\pm10{,}0\,\%$\\
+500 & 167 & 667 & 33 & $\pm3{,}0\,\%$\\
+1000 & 333 & 1333 & 67 & $\pm1{,}5\,\%$\\
+1500 & 500 & 2000 & 100 & $\pm1{,}0\,\%$\\
+2700 & 900 & 3600 & 180 & $\pm0{,}6\,\%$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Bảng~\ref{tab:encoder} cho thấy nhược điểm của phương pháp M: ở tốc độ thấp, sai số lượng tử lớn ($\pm$\SI{15}{rpm} là $\pm10\,\%$ tại \SI{150}{rpm}). Có thể cải thiện bằng encoder nhiều xung hơn, cửa sổ dài hơn (đánh đổi độ trễ), hoặc phương pháp T (đo chu kỳ xung) ở tốc độ thấp.
+
+\subsection{Kiểm chứng phép đo tốc độ}
+Để kiểm chứng giá trị RPM hiển thị trên TFT, nhóm so sánh với: (i) tần số kênh A đo trên máy hiện sóng, quy đổi $n=60\,f_A/PPR$; (ii) một encoder thứ hai (cảm biến từ, nam châm hướng kính gắn trên mặt bích in 3D ở đầu trục).
+
+\begin{table}[H]
+\centering\small
+\caption{So sánh tốc độ hiển thị và tốc độ đo độc lập}
+\label{tab:verify}
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+\textbf{Đặt (rpm)} & \textbf{TFT (rpm)} & \textbf{$f_A$ máy hiện sóng (Hz)} & \textbf{$60f_A/PPR$ (rpm)} & \textbf{Sai lệch (\%)}\\
+\midrule
+500 & \bosung{} & \bosung{} & \bosung{} & \bosung{}\\
+1500 & \bosung{} & \bosung{} & \bosung{} & \bosung{}\\
+2700 & \bosung{} & \bosung{} & \bosung{} & \bosung{}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Tính toán vòng điều khiển PID}
+\label{sec:pid}
+
+\subsection{Cấu trúc bộ điều khiển}
+Bộ điều khiển vận tốc gồm khâu PID kết hợp bù thuận (feed-forward). Ở dạng liên tục:
+\begin{equation}
+  u(t) = K_{ff}\,r(t) + K_p\,e(t) + K_i\int_0^t e(\tau)\,d\tau - K_d\,\frac{dy(t)}{dt},\qquad e = r - y,
+\end{equation}
+trong đó $r$ là tốc độ đặt sau khâu giới hạn gia tốc (rpm), $y$ là tốc độ đo (rpm), $u$ là độ rộng xung ($-255\ldots255$). Khâu vi phân lấy theo \emph{giá trị đo} thay vì sai số để tránh ``cú đá'' khi tốc độ đặt thay đổi đột ngột.
+
+Rời rạc hóa với chu kỳ lấy mẫu $T_s=\SI{50}{\milli\second}$ ($k$ là chỉ số mẫu):
+\begin{align}
+  P[k] &= K_p\,e[k],\\
+  I[k] &= I[k-1] + K_i T_s\, e[k],\\
+  D_{raw}[k] &= -\frac{K_d}{T_s}\big(y[k]-y[k-1]\big),\qquad
+  D[k] = D[k-1] + \tfrac{1}{4}\big(D_{raw}[k]-D[k-1]\big),\\
+  u[k] &= \operatorname{sat}_{\pm255}\big(K_{ff}\,r[k] + P[k] + I[k] + D[k]\big).
+\end{align}
+Khâu D được lọc thông thấp bậc nhất (hệ số $1/4$, tương ứng \texttt{MOTION\_D\_FILTER\_SHIFT = 2}) để giảm ảnh hưởng của nhiễu lượng tử \SI{15}{rpm}.
+
+\subsection{Biểu diễn dấu phẩy tĩnh Q8}
+Các hệ số được nhân với $2^8=256$ và làm tròn khi biên dịch: $K^{Q8}=\lfloor 256K+0{,}5\rfloor$. Tích phân được lưu ở dạng Q16 để không mất độ chính xác khi cộng dồn các giá trị rất nhỏ.
+
+\begin{table}[H]
+\centering\small
+\caption{Hệ số PID trong \texttt{config.h} và giá trị dấu phẩy tĩnh thực tế}
+\label{tab:gains}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Hệ số} & \textbf{Giá trị đặt} & \textbf{Q8} & \textbf{Giá trị thực} & \textbf{Đơn vị}\\
+\midrule
+$K_p$ & 0,03 & 8 & 0,03125 & duty/rpm\\
+$K_i$ & 0,2 & 51 & 0,1992 & duty/(rpm$\cdot$s)\\
+$K_d$ & 0 & 0 & 0 & duty$\cdot$s/rpm\\
+$K_{ff}$ & 0,085 & 22 & 0,0859 & duty/rpm\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Hệ số tích phân theo mẫu được tính trước một lần (hàm \texttt{recompute()}):
+\begin{equation}
+  \begin{aligned}
+  K_iT_s\big|_{Q16} &= \frac{K_i^{Q8}\cdot T_s[\text{ms}]\cdot256}{1000} = \frac{51\times50\times256}{1000}=652\\
+  &\Rightarrow\ \frac{652}{65536}\approx0{,}00995\approx K_iT_s=0{,}2\times0{,}05.
+  \end{aligned}
+\end{equation}
+
+\subsection{Ý nghĩa và cách chọn các hệ số}
+\paragraph{Bù thuận $K_{ff}$.} Ở trạng thái xác lập, tốc độ động cơ DC gần như tỉ lệ với điện áp trung bình, tức tỉ lệ với độ rộng xung. Nếu ở 100\,\% PWM ($u=255$) động cơ quay không tải ở $n_0$, thì $K_{ff}\approx255/n_0$. Với $K_{ff}=0{,}0859$, ta có $n_0\approx\SI{2970}{rpm}$ -- được xác định bằng thực nghiệm ở chế độ vòng hở. Tại tốc độ đặt tối đa \SI{2700}{rpm}, riêng khâu bù thuận đã cấp $u_{ff}=0{,}0859\times2700\approx232$, còn lại khoảng 23 đơn vị (9\,\%) dự trữ cho PID bù tải. Nhờ bù thuận, khâu PID chỉ phải xử lý \emph{phần sai lệch} do tải và phi tuyến, nên có thể dùng $K_p$ nhỏ, tránh dao động do nhiễu lượng tử.
+
+\paragraph{Khâu tỉ lệ $K_p$.} Với sai số bằng đúng một mức lượng tử (\SI{15}{rpm}), khâu P chỉ đóng góp $0{,}03125\times15\approx0{,}47$ đơn vị duty -- nhỏ hơn 1 bước PWM, nên nhiễu đo không làm PWM ``rung''. Khi sai số lớn (ví dụ \SI{300}{rpm} khi có tải đột ngột), khâu P cấp $\approx9{,}4$ đơn vị.
+
+\paragraph{Khâu tích phân $K_i$.} Triệt tiêu sai số xác lập do tải và do sai lệch giữa $K_{ff}$ với động cơ thực. Với sai số \SI{100}{rpm} kéo dài, khâu I tăng $0{,}2\times100=20$ đơn vị duty mỗi giây.
+
+\paragraph{Khâu vi phân $K_d=0$.} Vì đo tốc độ có nhiễu lượng tử \SI{15}{rpm} và chu kỳ lấy mẫu dài, khâu D khuếch đại nhiễu nhiều hơn là cải thiện đáp ứng, nên được tắt.
+
+\paragraph{Chống bão hòa tích phân.} Tích phân bị giới hạn trong $\pm255$ và bị ``đóng băng'' khi đầu ra đã bão hòa mà sai số vẫn cùng dấu (conditional integration), tránh vọt lố lớn sau khi động cơ bị kẹt hoặc khi tăng tốc mạnh.
+
+\paragraph{Giới hạn gia tốc.} Tốc độ đặt được tăng tối đa $6000\times0{,}05=300$ rpm mỗi chu kỳ, tức đi từ 0 tới \SI{2700}{rpm} trong $\approx\SI{0.45}{\second}$, giảm dòng khởi động và giật cơ khí.
+
+\subsection{Quy trình tinh chỉnh}
+\begin{enumerate}
+  \item Đặt \texttt{APP\_OPEN\_LOOP = 1}, tăng dần PWM để xác nhận chiều quay, chiều đếm encoder (\texttt{MOTOR\_INVERT}, \texttt{ENC\_INVERT}) và đo tốc độ không tải $n_0$ tại $u=255$.
+  \item Đóng vòng, đặt $K_p=K_i=K_d=0$, chọn $K_{ff}=255/n_0$: tốc độ đo phải gần với tốc độ đặt (sai số vài phần trăm).
+  \item Tăng $K_i$ cho đến khi sai số xác lập biến mất trong khoảng \SIrange{0.5}{1}{\second} mà không dao động.
+  \item Tăng $K_p$ để cải thiện đáp ứng khi tải thay đổi, dừng khi giá trị hiển thị bắt đầu dao động quanh tốc độ đặt.
+\end{enumerate}
+
+\subsection{Mô phỏng đáp ứng bước}
+Để minh họa tác dụng của các khâu, nhóm mô phỏng vòng điều khiển với thuật toán \emph{giống hệt} \texttt{motion.c} (số học nguyên Q8/Q16, lượng tử \SI{15}{rpm}, chu kỳ \SI{50}{\milli\second}, ramp 6000 rpm/s) và mô hình động cơ quán tính bậc nhất \emph{giả định}:
+\begin{equation}
+  G(s)=\frac{n(s)}{u(s)}=\frac{K_m}{\tau s+1},\qquad K_m=\frac{1}{K_{ff}}\approx\SI{11.6}{rpm}/\text{duty},\quad \tau=\SI{0.15}{\second}\ (\text{giả định}).
+\end{equation}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[width=0.92\linewidth,height=7cm,xlabel={Thời gian (s)},ylabel={Tốc độ (rpm)},
+  xmin=0,xmax=2,ymin=0,ymax=1800,grid=major,grid style={gray!25},
+  legend pos=south east,legend style={font=\scriptsize},tick label style={font=\scriptsize}]
+  \addplot[gray,dashed,thick] table[x=t,y=sp]{data/sim_1500.dat};
+  \addlegendentry{Tốc độ đặt sau ramp $r$}
+  \addplot[hustred,very thick] table[x=t,y=w]{data/sim_1500.dat};
+  \addlegendentry{PID + bù thuận ($K_{ff}=0{,}0859$)}
+  \addplot[blk,thick] table[x=t,y=w]{data/sim_1500_noff.dat};
+  \addlegendentry{Chỉ PID ($K_{ff}=0$)}
+\end{axis}
+\end{tikzpicture}
+\caption{Mô phỏng đáp ứng bước 0\,$\to$\,\SI{1500}{rpm} (mô hình động cơ giả định, chỉ mang tính minh họa)}
+\label{fig:sim}
+\end{figure}
+
+Kết quả mô phỏng: khi có bù thuận, tốc độ đạt 95\,\% giá trị đặt sau khoảng \SI{0.31}{\second} (độ vọt lố $\approx13\,\%$ do khâu I tích lũy trong giai đoạn ramp); khi bỏ bù thuận, hệ thống đáp ứng chậm hơn rõ rệt ($\approx\SI{1.4}{\second}$) vì toàn bộ tín hiệu điều khiển phải do khâu I tích lũy dần. Mô phỏng khẳng định vai trò chủ đạo của $K_{ff}$ trong cấu trúc điều khiển đã chọn. Đáp ứng thực tế được trình bày ở mục~\ref{sec:chaythu}.
+
+\section{Hướng dẫn sử dụng}
+\label{sec:huongdan}
+
+\subsection{Kết nối}
+\begin{enumerate}
+  \item Nối động cơ vào domino \textbf{M1}, encoder vào \textbf{J7} (+5V, A, B, GND).
+  \item Cắm module TFT vào header \textbf{J2}.
+  \item (Tùy chọn) Nối mạch USB--UART vào \textbf{J3}: TX của mạch chuyển đổi $\to$ chân RX (chân 2), GND $\to$ chân 3.
+  \item Cấp nguồn \textbf{\SI{12}{\volt} DC} vào \textbf{J1}, chú ý đúng cực tính (mạch có bảo vệ ngược cực).
+\end{enumerate}
+Sau khi cấp nguồn, hệ thống khởi động ở trạng thái \textbf{STOP}: chữ ``STOP'' màu đỏ trên màn hình, LED STOP sáng.
+
+\subsection{Chọn chế độ}
+\begin{enumerate}
+  \item Ở trạng thái STOP, \textbf{giữ nút RUN khoảng \SI{2}{\second}}: màn hình hiện ``SELECT'' màu cam.
+  \item \textbf{Nhấn ngắn RUN} để chuyển qua lại giữa \texttt{Mode: Potentiometer} (vàng) và \texttt{Mode: UART} (xanh lơ).
+  \item \textbf{Giữ RUN \SI{2}{\second}} để xác nhận; hệ thống trở về STOP với chế độ đã chọn. Nhấn STOP để hủy.
+\end{enumerate}
+
+\subsection{Vận hành}
+Nhấn ngắn \textbf{RUN}: màn hình hiện ``RUNNING'' màu xanh lá, LED RUN sáng.
+\begin{itemize}
+  \item \textbf{Chế độ chiết áp:} vị trí giữa (có vùng chết $\pm15$ mức ADC) ứng với \SI{0}{rpm}; xoay về một phía để quay thuận, phía kia để quay nghịch; hết hành trình ứng với $\pm\SI{2700}{rpm}$.
+  \item \textbf{Chế độ UART:} gửi lệnh theo giao thức ở Bảng~\ref{tab:uartproto}.
+\end{itemize}
+Nhấn \textbf{STOP} bất kỳ lúc nào để dừng động cơ: tầng công suất chuyển sang chế độ ngủ, PID được reset.
+
+\begin{table}[H]
+\centering\small
+\caption{Giao thức lệnh UART}
+\label{tab:uartproto}
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+\textbf{Thông số} & \textbf{Giá trị}\\
+\midrule
+Tốc độ / khung & \SI{115200}{baud}, 8N1, chỉ nhận (PC $\to$ bo)\\
+Định dạng lệnh & Một số nguyên có dấu mỗi dòng, kết thúc bằng \texttt{\textbackslash n} hoặc \texttt{\textbackslash r}; ký tự khác bị bỏ qua\\
+Dải giá trị & $-255\ldots+255$ (tự động kẹp), ánh xạ tuyến tính sang $-2700\ldots+2700$ rpm\\
+Ví dụ & \texttt{255} $\to$ \SI{2700}{rpm} quay thuận;\quad \texttt{-128} $\to\approx$ \SI{-1355}{rpm};\quad \texttt{0} $\to$ giữ \SI{0}{rpm}\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{lstlisting}[language=Python,caption={Gửi lệnh tốc độ bằng Python (pyserial)},label={lst:python}]
+import serial, time
+ser = serial.Serial("COM3", 115200)
+for cmd in (100, 200, -200, 0):
+    ser.write(f"{cmd}\n".encode())
+    time.sleep(2)
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+  \draw[fill=black,rounded corners=2pt] (0,0) rectangle (8,6.4);
+  \node[anchor=north,font=\ttfamily\small,text=yellow] at (4,6.25) {Mode: Potentiometer};
+  \node[anchor=west,font=\ttfamily\small,text=white] at (0.2,5.0) {Velocity =};
+  \node[anchor=west,font=\ttfamily\Huge,text=white] at (0.2,3.9) {  1494};
+  \node[anchor=west,font=\ttfamily\small,text=white] at (0.2,2.75) {Target =   1500};
+  \node[anchor=west,font=\ttfamily\Large\bfseries,text=green] at (0.2,1.3) {RUNNING};
+  \foreach \y/\t in {6.0/Chế độ đang dùng,3.9/Tốc độ đo (rpm),2.75/Tốc độ đặt (rpm),1.3/Trạng thái}
+     \draw[<-,thick,gray] (8.1,\y) -- (9,\y) node[right,text=black,font=\small]{\t};
+\end{tikzpicture}
+\caption{Bố cục màn hình TFT (minh họa)}
+\label{fig:tftlayout}
+\end{figure}
+
+\subsection{Tùy biến cho động cơ khác}
+Mọi thông số nằm trong \texttt{config.h}. Khi đổi động cơ/encoder, chỉ cần chỉnh: \texttt{ENC\_PPR} (số xung/vòng encoder), \texttt{ENC\_INVERT}, \texttt{MOTOR\_INVERT} (chiều quay), \texttt{APP\_MAX\_RPM} (tốc độ tối đa), các hệ số \texttt{MOTION\_KP/KI/KD/KFF} và \texttt{MOTION\_ACCEL}. Nếu hàn jumper JP1 (chế độ PH/EN của DRV8220), bỏ chú thích \texttt{MOTOR\_MODE\_PH\_EN}.
+
+\section{Chạy thử thực tế}
+\label{sec:chaythu}
+
+\begin{table}[H]
+\centering\small
+\caption{Kịch bản và kết quả chạy thử}
+\label{tab:runtest}
+\begin{tabularx}{\linewidth}{@{}c>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{4cm}c@{}}
+\toprule
+\textbf{STT} & \textbf{Kịch bản} & \textbf{Kết quả mong đợi} & \textbf{Đạt?}\\
+\midrule
+1 & Cấp nguồn & Màn hình hiện STOP, LED STOP sáng & \bosung{}\\
+2 & Giữ RUN 2\,s, nhấn ngắn, giữ 2\,s & Đổi và xác nhận chế độ & \bosung{}\\
+3 & Chế độ chiết áp, xoay từ giữa sang hai phía & Quay thuận/nghịch, tốc độ tăng dần & \bosung{}\\
+4 & Đặt \SI{1500}{rpm}, quan sát xác lập & Sai lệch $\le\pm\SI{15}{rpm}$ (1 mức lượng tử) & \bosung{}\\
+5 & Hãm trục bằng tay khi đang chạy & Tốc độ giảm rồi hồi phục, PWM tăng & \bosung{}\\
+6 & Chế độ UART: gửi 255, -255, 0 & Đạt $\pm\SI{2700}{rpm}$ và dừng & \bosung{}\\
+7 & Nhấn STOP khi đang chạy & Động cơ dừng, nSLEEP = 0 & \bosung{}\\
+8 & Nhấn RUN khi đang chạy & Không thay đổi & \bosung{}\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\hinh[0.85\linewidth]{figures/step_response.png}{Đồ thị đáp ứng bước thực tế 0 $\to$ 1500 rpm (ghi số liệu từ TFT/encoder thứ hai)}
+\caption{Đáp ứng bước thực tế}
+\label{fig:stepreal}
+\end{figure}
+
+\begin{table}[H]
+\centering\small
+\caption{Chỉ tiêu chất lượng đáp ứng bước \SI{1500}{rpm}}
+\label{tab:kpi}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Chỉ tiêu} & \textbf{Mô phỏng} & \textbf{Thực tế} & \textbf{Ghi chú}\\
+\midrule
+Thời gian đạt 95\,\% & \SI{0.31}{\second} & \bosung{} & \\
+Độ vọt lố & 13\,\% & \bosung{} & \\
+Sai số xác lập & $\pm\SI{15}{rpm}$ & \bosung{} & giới hạn bởi lượng tử\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\hinh[0.75\linewidth]{figures/run_test.jpg}{Ảnh hệ thống đang chạy thử: bo mạch, động cơ, encoder, màn hình}
+\caption{Hệ thống \proj{} khi chạy thử}
+\label{fig:runtest}
+\end{figure}

@@ -1,0 +1,142 @@
+% =====================================================================
+%  BÁO CÁO CUỐI KỲ - ME4169 VI XỬ LÝ
+%  Đề tài: UNIDRIVE LITE - Bộ điều khiển tốc độ động cơ DC vòng kín
+%  Biên dịch: XeLaTeX (Overleaf: Menu -> Compiler -> XeLaTeX)
+% =====================================================================
+\documentclass[a4paper,12pt]{extreport}
+
+% ---------------- Font & ngôn ngữ ----------------
+\usepackage{iftex}
+\ifPDFTeX
+  \errmessage{UNIDRIVE LITE: hay chon trinh bien dich XeLaTeX (Overleaf: Menu -> Compiler -> XeLaTeX)}
+  \stop
+\fi
+\usepackage{fontspec}
+% Nạp font theo TÊN TỆP (có sẵn trong mọi bản TeX Live: Overleaf, MiKTeX, TeX Live)
+\setmainfont{texgyretermes}[Extension=.otf,
+  UprightFont=*-regular, BoldFont=*-bold, ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\setmonofont{texgyrecursor}[Extension=.otf, Scale=0.95,
+  UprightFont=*-regular, BoldFont=*-bold, ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\usepackage{polyglossia}
+\setdefaultlanguage{vietnamese}
+
+% ---------------- Trang & bố cục ----------------
+\usepackage[left=3cm,right=2cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage{setspace}\setstretch{1.3}
+\setlength{\parindent}{0cm}
+\setlength{\parskip}{4pt}
+\usepackage{indentfirst}
+\setlength{\emergencystretch}{3em}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+
+% ---------------- Toán, bảng, hình ----------------
+\usepackage{amsmath,amssymb}
+\usepackage{siunitx}
+\sisetup{output-decimal-marker={,},group-separator={.},per-mode=symbol,range-phrase={\,--\,},range-units=single,list-final-separator={ và },list-pair-separator={ và }}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption,subcaption}
+\usepackage{booktabs,tabularx,longtable,multirow,array,makecell}
+\usepackage[table]{xcolor}
+\usepackage{enumitem}
+\usepackage{pdfpages}
+\usepackage{tcolorbox}\tcbuselibrary{skins,breakable}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,shapes.misc,fit,calc,backgrounds,decorations.pathreplacing}
+\usepackage{pgfplots}\pgfplotsset{compat=1.17}
+\usepackage[hidelinks]{hyperref}
+\usepackage{bookmark}
+
+% ---------------- Màu & macro dùng chung ----------------
+\definecolor{hustred}{HTML}{B11F24}
+\definecolor{blk}{HTML}{1F4E79}
+\definecolor{blkfill}{HTML}{DEEAF6}
+\definecolor{pwrfill}{HTML}{FDE9D9}
+\definecolor{iofill}{HTML}{E2EFDA}
+\definecolor{swfill}{HTML}{FFF2CC}
+\definecolor{codebg}{HTML}{F7F7F7}
+
+\newcommand{\proj}{\textsc{UniDrive Lite}}
+\newcommand{\projpro}{\textsc{UniDrive V1}}
+% Đánh dấu chỗ cần bổ sung số liệu/hình thực tế
+\newcommand{\bosung}[1]{\textcolor{red}{\textbf{[Cần bổ sung: #1]}}}
+% Chèn hình nếu có, nếu chưa có thì vẽ khung giữ chỗ
+\newcommand{\hinh}[3][0.85\linewidth]{%
+  \IfFileExists{#2}{\includegraphics[width=#1]{#2}}{%
+    \fbox{\parbox[c][5cm][c]{#1}{\centering\color{red}\textbf{Chèn hình:}\\ \texttt{\detokenize{#2}}\\[2pt]\small #3}}}}
+
+% Khung "ghi chú kỹ thuật"
+\newtcolorbox{ghichu}[1][Ghi chú]{colback=blkfill!40,colframe=blk,fonttitle=\bfseries,title=#1,breakable}
+
+% Kiểu listing cho mã nguồn
+\lstdefinestyle{fw}{
+  language=C, basicstyle=\ttfamily\footnotesize, backgroundcolor=\color{codebg},
+  keywordstyle=\color{blue!70!black}\bfseries, commentstyle=\color{green!45!black}\itshape,
+  stringstyle=\color{orange!70!black}, numbers=left, numberstyle=\tiny\color{gray},
+  frame=single, rulecolor=\color{gray!50}, breaklines=true, showstringspaces=false,
+  tabsize=4, columns=fullflexible, keepspaces=true,
+  morekeywords={uint8_t,int8_t,uint16_t,int16_t,uint32_t,int32_t,ISR,volatile,bool}}
+\lstset{style=fw}
+
+% ---------------- Tiêu đề chương ----------------
+\titleformat{\chapter}[display]{\normalfont\bfseries\centering}
+  {\Large\MakeUppercase{\chaptertitlename}\ \thechapter}{6pt}{\LARGE\MakeUppercase}
+\titlespacing*{\chapter}{0pt}{-20pt}{20pt}
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{0.6em}{}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{2}
+
+% ---------------- Header/footer ----------------
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small ME4169 -- Vi xử lý}
+\fancyhead[R]{\small Báo cáo cuối kỳ: \proj}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\thepage}\renewcommand{\headrulewidth}{0pt}}
+
+% ---------------- Thông tin nhóm (SỬA Ở ĐÂY) ----------------
+\newcommand{\truong}{ĐẠI HỌC BÁCH KHOA HÀ NỘI}
+\newcommand{\khoa}{TRƯỜNG CƠ KHÍ}
+\newcommand{\hocphan}{ME4169 -- VI XỬ LÝ}
+\newcommand{\gvhd}{TS. Dương Văn Lạc}
+\newcommand{\malop}{\bosung{mã lớp}}
+\newcommand{\hockyy}{\bosung{học kỳ}}
+
+\begin{document}
+
+% ============================ PHẦN ĐẦU ============================
+\pagenumbering{roman}
+\include{parts/00_loinoidau}
+
+\tableofcontents
+\clearpage
+\listoffigures
+\addcontentsline{toc}{chapter}{Danh mục hình vẽ}
+\clearpage
+\listoftables
+\addcontentsline{toc}{chapter}{Danh mục bảng biểu}
+\clearpage
+\begin{figure}[H]
+  \centering
+  \includegraphics[page=1, width=1\linewidth]{figures/ME4169_DEBAI.pdf}
+\end{figure}
+\addcontentsline{toc}{chapter}{Đề bài học phần}
+\clearpage
+
+% ============================ NỘI DUNG CHÍNH ============================
+\pagenumbering{arabic}
+%\include{parts/01_gioithieu}
+\include{parts/02_thietke}
+%\include{parts/03_firmware}
+%\include{parts/04_lapdat}
+%\include{parts/05_ketluan}
+
+% ============================ PHỤ LỤC ============================
+\appendix
+%\include{parts/06_phuluc}
+
+\end{document}

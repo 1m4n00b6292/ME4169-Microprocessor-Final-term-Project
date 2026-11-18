@@ -1,0 +1,27 @@
+\contentsline {chapter}{Lời nói đầu}{i}{chapter*.1}%
+\contentsline {chapter}{Lời cảm ơn}{iii}{chapter*.2}%
+\xpg@aux {}{vietnamese}
+\contentsline {chapter}{Danh mục hình vẽ}{v}{chapter*.2}%
+\contentsline {chapter}{Danh mục bảng biểu}{vi}{chapter*.2}%
+\contentsline {chapter}{Đề bài học phần}{vii}{figure.caption.3}%
+\contentsline {chapter}{\numberline {1}Quá trình thiết kế phần cứng}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Quy trình thiết kế tổng thể}{1}{section.1.1}%
+\contentsline {subsection}{\numberline {1.1.1}Yêu cầu thiết kế}{1}{subsection.1.1.1}%
+\contentsline {section}{\numberline {1.2}Lựa chọn linh kiện}{2}{section.1.2}%
+\contentsline {subsection}{\numberline {1.2.1}Vi điều khiển: ATmega88PA}{2}{subsection.1.2.1}%
+\contentsline {subsection}{\numberline {1.2.2}IC Cầu H: DRV8220}{3}{subsection.1.2.2}%
+\contentsline {subsection}{\numberline {1.2.3}Nguồn: buck LMR51420 + LDO AP2112K}{4}{subsection.1.2.3}%
+\contentsline {subsection}{\numberline {1.2.4}Chống ngược cực: P-MOSFET CSD25404Q3}{4}{subsection.1.2.4}%
+\contentsline {subsection}{\numberline {1.2.5}IC chuyển mức logic: TXB0106}{5}{subsection.1.2.5}%
+\contentsline {section}{\numberline {1.3}Thiết kế sơ đồ nguyên lý}{6}{section.1.3}%
+\contentsline {paragraph}{Điện áp ra của buck.}{6}{paragraph*.13}%
+\contentsline {paragraph}{Mạch dao động thạch anh.}{6}{paragraph*.14}%
+\contentsline {paragraph}{Nguồn tương tự AVCC.}{6}{paragraph*.15}%
+\contentsline {paragraph}{Nút nhấn.}{6}{paragraph*.16}%
+\contentsline {paragraph}{LED trạng thái.}{7}{paragraph*.17}%
+\contentsline {paragraph}{Cổng nạp và điểm đo.}{7}{paragraph*.18}%
+\contentsline {section}{\numberline {1.4}Thiết kế mạch in (PCB)}{7}{section.1.4}%
+\contentsline {subsection}{\numberline {1.4.1}Thông số bo mạch}{7}{subsection.1.4.1}%
+\contentsline {subsection}{\numberline {1.4.2}Bố trí linh kiện (placement)}{7}{subsection.1.4.2}%
+\contentsline {subsection}{\numberline {1.4.3}Đi dây (routing)}{8}{subsection.1.4.3}%
+\contentsline {subsection}{\numberline {1.4.4}Kiểm tra và xuất tệp sản xuất}{8}{subsection.1.4.4}%

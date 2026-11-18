@@ -1,0 +1,43 @@
+%!TEX root = ./main.tex
+%!TEX program = xelatex
+% =====================================================================
+%  00 - LỜI NÓI ĐẦU VÀ LỜI CẢM ƠN
+% =====================================================================
+\chapter*{Lời nói đầu}
+\addcontentsline{toc}{chapter}{Lời nói đầu}
+
+Động cơ điện một chiều có chổi than (Brushed DC Motor) là cơ cấu chấp hành quen thuộc nhất trong kỹ thuật cơ điện tử: từ chiếc quạt tản nhiệt, robot giáo dục, cho tới băng tải, cánh tay robot và xe tự hành trong nhà máy. Tuy nhiên, chỉ cấp điện cho động cơ là chưa đủ -- tốc độ thực tế sẽ thay đổi theo tải, theo điện áp nguồn và theo nhiệt độ. Muốn động cơ quay đúng tốc độ mong muốn, hệ thống cần đo được tốc độ thực và liên tục hiệu chỉnh điện áp cấp cho động cơ. Đó chính là bài toán điều khiển vòng kín, một nội dung nền tảng mà mọi kỹ sư cơ điện tử cần nắm vững.
+
+Trong khuôn khổ học phần \textbf{ME4169 -- Vi xử lý}, nhóm chúng em lựa chọn thực hiện đề tài \textbf{\proj} -- một bộ điều khiển tốc độ động cơ DC vòng kín hoàn chỉnh, được thiết kế ``từ con số không'': từ sơ đồ nguyên lý, mạch in (PCB), lựa chọn linh kiện, cho tới firmware lập trình trực tiếp trên thanh ghi (bare-metal) của vi điều khiển AVR \textbf{ATmega88PA}. Hệ thống đọc tốc độ bằng quadrature encoder, điều khiển bằng bộ điều khiển PID số dấu phẩy tĩnh, nhận lệnh từ chiết áp hoặc cổng UART và hiển thị trạng thái trên màn hình TFT.
+
+Đề tài giúp nhóm vận dụng tổng hợp các kiến thức của học phần: cấu trúc vi điều khiển, interrupt, timer, ADC, các chuẩn truyền thông nối tiếp SPI và UART; đồng thời mở rộng sang thiết kế phần cứng, điện tử công suất và lý thuyết điều khiển.
+
+Báo cáo được tổ chức thành các chương như sau:
+\begin{itemize}[leftmargin=1.5cm]
+  \item \textbf{Chương 1 -- Giới thiệu:} ứng dụng của điều khiển động cơ DC trong đời sống và công nghiệp; tổng quan về \proj, sơ đồ khối, danh sách linh kiện và thông số kỹ thuật.
+  \item \textbf{Chương 2 -- Quá trình thiết kế phần cứng:} quy trình thiết kế, lựa chọn linh kiện, thiết kế sơ đồ nguyên lý và bố trí mạch in.
+  \item \textbf{Chương 3 -- Cấu trúc firmware:} logic hoạt động, phân lớp phần mềm, sơ đồ khối firmware, quy trình nạp và gỡ lỗi bằng PlatformIO với Arduino Nano làm mạch nạp ISP.
+  \item \textbf{Chương 4 -- Lắp ráp, đo kiểm và vận hành:} đo tín hiệu bằng máy hiện sóng, tính toán encoder, tính toán vòng điều khiển PID, hướng dẫn sử dụng và chạy thử thực tế.
+  \item \textbf{Chương 5 -- Kết luận:} đánh giá kết quả, các hạn chế và định hướng phát triển phiên bản nâng cấp \projpro.
+  \item \textbf{Phụ lục:} mã nguồn firmware, sơ đồ nguyên lý, layout và tài liệu tham khảo.
+\end{itemize}
+
+Do thời gian và kinh nghiệm còn hạn chế, báo cáo khó tránh khỏi thiếu sót. Nhóm rất mong nhận được những ý kiến đóng góp của thầy để hoàn thiện sản phẩm và báo cáo.
+
+\chapter*{Lời cảm ơn}
+\addcontentsline{toc}{chapter}{Lời cảm ơn}
+
+Lời đầu tiên, nhóm chúng em xin gửi lời cảm ơn chân thành và sâu sắc nhất tới giảng viên học phần Vi xử lý -- \textbf{\gvhd}. Những bài giảng của thầy về kiến trúc vi điều khiển, interrupt, timer và các ngoại vi truyền thông đã trở thành nền móng trực tiếp cho từng dòng firmware của \proj. Sự hướng dẫn tận tình và những góp ý thẳng thắn của thầy trong suốt quá trình thực hiện đã giúp nhóm định hướng đúng, tránh được nhiều sai lầm và hoàn thành đề tài đúng tiến độ.
+
+Nhóm cũng xin cảm ơn các thầy cô Trường Cơ khí, Trường Điện - Điện tử, Đại học Bách khoa Hà Nội đã truyền đạt các kiến thức nền tảng về điện tử, điều khiển tự động và cơ điện tử; cảm ơn bạn \textbf{Đỗ Tiến Mạnh}, Sinh viên CTTN Cơ điện tử K68 đã hỗ trợ trong quá trình mua linh kiện; cảm ơn bạn \textbf{Vũ Hải Đăng}, Sinh viên Kỹ thuật Điều khiển và Tự động hóa K69, anh \textbf{Trịnh Thái Dương}, Cử nhân Cơ điện tử K67 đã chia sẻ kinh nghiệm, hỗ trợ dụng cụ đo và cùng thảo luận trong quá trình làm việc.
+
+Cuối cùng, nhóm xin cảm ơn cộng đồng mã nguồn mở (KiCad, PlatformIO, AVR-GCC, WeAct Studio) đã cung cấp những công cụ và tài liệu tuyệt vời giúp một nhóm sinh viên có thể tự thiết kế và chế tạo một sản phẩm phần cứng hoàn chỉnh.
+
+\vspace{1cm}
+\begin{flushright}
+\begin{minipage}{0.45\linewidth}
+\centering
+\textit{Hà Nội, ngày \ldots\ tháng 11 năm 2026}\\[4pt]
+\textbf{Nhóm sinh viên thực hiện}\\[2.2cm]
+\end{minipage}
+\end{flushright}

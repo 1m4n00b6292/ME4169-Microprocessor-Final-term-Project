@@ -1,0 +1,101 @@
+%!TEX root = ./main.tex
+%!TEX program = xelatex
+% =====================================================================
+%  06 - PHỤ LỤC
+% =====================================================================
+\chapter{Mã nguồn firmware}
+\label{app:firmware}
+
+Mã nguồn đầy đủ được lưu tại kho GitHub của nhóm:\\
+\url{https://github.com/1m4n00b6292/ME4169-Microprocessor-Final-term-Project}. Tên tệp và chú thích trong mã nguồn vẫn giữ tên dự án cũ ``VI XU LY''.
+
+\section{Cấu hình}
+\lstinputlisting[caption={config.h},label={lst:config}]{firmware/src/config.h}
+\lstinputlisting[language={},caption={platformio.ini}]{firmware/platformio.ini}
+
+\section{Lớp điểm vào và ứng dụng}
+\lstinputlisting[language=C++,caption={main.cpp}]{firmware/src/main.cpp}
+\lstinputlisting[language=C++,caption={app.h}]{firmware/src/app.h}
+\lstinputlisting[language=C++,caption={app.cpp}]{firmware/src/app.cpp}
+
+\section{Lớp điều khiển}
+\lstinputlisting[caption={motion.h}]{firmware/src/motion.h}
+\lstinputlisting[caption={motion.c}]{firmware/src/motion.c}
+
+\section{Lớp driver}
+\lstinputlisting[caption={motor.h}]{firmware/src/motor.h}
+\lstinputlisting[caption={motor.c}]{firmware/src/motor.c}
+\lstinputlisting[language=C++,caption={encoder\_mini.h}]{firmware/src/encoder_mini.h}
+\lstinputlisting[language=C++,caption={encoder\_mini.cpp}]{firmware/src/encoder_mini.cpp}
+\lstinputlisting[caption={button.h}]{firmware/src/button.h}
+\lstinputlisting[caption={button.c}]{firmware/src/button.c}
+\lstinputlisting[caption={uart.h}]{firmware/src/uart.h}
+\lstinputlisting[caption={uart.c}]{firmware/src/uart.c}
+\lstinputlisting[caption={adc.h}]{firmware/src/adc.h}
+\lstinputlisting[caption={adc.c}]{firmware/src/adc.c}
+\lstinputlisting[caption={st7735\_mini.h}]{firmware/src/st7735_mini.h}
+\lstinputlisting[caption={st7735\_mini.c}]{firmware/src/st7735_mini.c}
+
+\chapter{Sơ đồ nguyên lý}
+\label{app:schematic}
+Sơ đồ nguyên lý đầy đủ của \proj{} (xuất từ KiCad) được trình bày ở trang sau, xoay ngang khổ A4.
+
+\begin{center}
+\includegraphics[height=\linewidth,angle=90,page=1]{sch/VIXULY_schematic.pdf}
+\end{center}
+
+\chapter{Layout mạch in}
+\label{app:layout}
+
+\begin{figure}[H]
+\centering
+\hinh[0.95\linewidth]{figures/Layout_Front.png}{Layout lớp trên}
+\caption{Layout lớp trên (F.Cu) -- kích thước đầy đủ}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\hinh[0.95\linewidth]{figures/Layout_Back.png}{Layout lớp dưới}
+\caption{Layout lớp dưới (B.Cu) -- kích thước đầy đủ}
+\end{figure}
+
+\begin{table}[H]
+\centering\small
+\caption{Danh sách tệp sản xuất (Gerber)}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Tệp} & \textbf{Nội dung}\\
+\midrule
+\texttt{VI XU LY-F\_Cu.gbr} / \texttt{-B\_Cu.gbr} & Lớp đồng trên / dưới\\
+\texttt{VI XU LY-F\_Mask.gbr} / \texttt{-B\_Mask.gbr} & Mặt nạ hàn\\
+\texttt{VI XU LY-F\_Silkscreen.gbr} / \texttt{-B\_Silkscreen.gbr} & Lớp in lụa\\
+\texttt{VI XU LY-F\_Paste.gbr} / \texttt{-B\_Paste.gbr} & Lớp kem hàn (stencil)\\
+\texttt{VI XU LY-Edge\_Cuts.gbr} & Đường viền bo mạch\\
+\texttt{VI XU LY.drl}, \texttt{VI XU LY-drl\_map.gbr} & Tệp khoan và bản đồ khoan\\
+\texttt{VI XU LY-job.gbrjob} & Tệp mô tả công việc (Gerber job)\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\chapter{Tài liệu tham khảo}
+\label{app:docs}
+
+\begingroup
+\makeatletter\let\chapter\@gobbletwo\makeatother
+\begin{thebibliography}{99}
+\bibitem{atmega} Microchip Technology, \emph{ATmega48PA/88PA/168PA/328P -- 8-bit AVR Microcontroller with 4/8/16/32K Bytes In-System Programmable Flash}, Datasheet.
+\bibitem{drv8220} Texas Instruments, \emph{DRV8220 18-V H-Bridge Motor Driver with PWM, PH/EN, and Half-Bridge Control Interfaces and Low-Power Sleep Mode}, SLVSFU5B, 2021.
+\bibitem{lmr51420} Texas Instruments, \emph{LMR51420 SIMPLE SWITCHER\textsuperscript{\textregistered} 4.5-V to 36-V, 2-A Synchronous Buck Converter in a SOT-23 Package}, SLUSEF6C, 2022.
+\bibitem{csd25404} Texas Instruments, \emph{CSD25404Q3 --20 V P-Channel NexFET\texttrademark{} Power MOSFET}, SLPS570, 2015.
+\bibitem{txb0106} Texas Instruments, \emph{TXB0106 6-Bit Bidirectional Level-Shifting and Voltage Translator With Auto-Direction Sensing}, SCES709C, 2025.
+\bibitem{ap2112} Diodes Incorporated, \emph{AP2112 600mA CMOS LDO Regulator with Enable}, Datasheet.
+\bibitem{st7735} Sitronix, \emph{ST7735S 132RGB$\times$162dot 262K Color with Frame Memory Single-Chip TFT Controller/Driver}, Datasheet.
+\bibitem{weact} WeAct Studio, \emph{WeAct ST7735 TFT Module}, \url{https://github.com/WeActStudio/WeAct-ST7735}.
+\bibitem{pio} PlatformIO, \emph{PlatformIO Documentation -- Atmel AVR platform}, \url{https://docs.platformio.org}.
+\bibitem{arduinoisp} Arduino, \emph{Arduino as ISP and Arduino Bootloaders}, \url{https://docs.arduino.cc/built-in-examples/arduino-isp/ArduinoISP}.
+\bibitem{kicad} KiCad EDA, \emph{KiCad Documentation}, \url{https://docs.kicad.org}.
+\bibitem{ogata} K. Ogata, \emph{Modern Control Engineering}, 5th ed., Prentice Hall, 2010.
+\bibitem{astrom} K. J. Åström, T. Hägglund, \emph{Advanced PID Control}, ISA, 2006.
+\bibitem{repo} Nhóm thực hiện, \emph{ME4169 Microprocessor Final term project -- mã nguồn và thiết kế}, \url{https://github.com/1m4n00b6292/ME4169-Microprocessor-Final-term-Project}.
+\end{thebibliography}
+\endgroup

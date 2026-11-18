@@ -1,0 +1,58 @@
+%!TEX root = ./main.tex
+%!TEX program = xelatex
+% =====================================================================
+%  05 - KẾT LUẬN
+% =====================================================================
+\chapter{Kết luận và hướng phát triển}
+\label{ch:ketluan}
+
+\section{Tổng kết}
+Đề tài đã thiết kế, chế tạo và lập trình thành công \textbf{\proj} -- bộ điều khiển tốc độ động cơ DC vòng kín hoàn chỉnh trên vi điều khiển ATmega88PA. Các kết quả chính:
+\begin{itemize}
+  \item \textbf{Phần cứng:} bo mạch 2 lớp 80\,$\times$\,60\,mm tự thiết kế trên KiCad, tích hợp nguồn buck hiệu suất cao, bảo vệ ngược cực bằng P-MOSFET, cầu H DRV8220 có chế độ ngủ, chuyển mức logic cho màn hình và đầy đủ điểm đo phục vụ kiểm tra.
+  \item \textbf{Firmware:} viết theo phong cách bare-metal, phân lớp rõ ràng, cấu hình tập trung trong \texttt{config.h}; gồm driver PWM mềm, giải mã encoder $\times4$ có lọc nhiễu số, PID dấu phẩy tĩnh có bù thuận, giới hạn gia tốc và chống bão hòa tích phân, driver TFT rút gọn vừa bộ nhớ 8\,KB.
+  \item \textbf{Chức năng:} điều khiển hai chiều quay trong dải $\pm\SI{2700}{rpm}$, đặt tốc độ bằng chiết áp hoặc UART, giao diện nút nhấn -- LED -- TFT với máy trạng thái STOP/RUN/SELECT đúng đặc tả.
+  \item \textbf{Kiến thức:} nhóm đã vận dụng trực tiếp các nội dung của học phần (ngắt, timer, ADC, SPI, UART, GPIO) cùng các kiến thức thiết kế mạch in, điện tử công suất và điều khiển tự động.
+\end{itemize}
+
+\section{Hạn chế}
+\label{sec:hanche}
+Trong quá trình thiết kế và chạy thử, nhóm nhận thấy các hạn chế sau:
+\begin{enumerate}
+  \item \textbf{Lỗi nối chân OE của TXB0106.} Tín hiệu \texttt{OE\_CONTROL} được nối vào chân \textbf{ADC6} (chân 19) của ATmega88PA. Trên vỏ TQFP, ADC6/ADC7 là chân \emph{chỉ có chức năng tương tự}, không có bộ đệm ra số, nên MCU không thể chủ động kéo OE lên mức cao. \bosung{mô tả cách nhóm đã khắc phục trên bo thực tế, ví dụ câu dây OE\_CONTROL lên +5V}. Ở phiên bản sau, OE cần được nối vào một chân GPIO thật (ví dụ PC5 đang để trống) hoặc kéo lên cố định.
+  \item \textbf{Không có bộ giải mã encoder phần cứng.} Bộ lọc encoder phải lấy mẫu bằng ngắt Timer1 ở \SI{80}{\kilo\hertz}, ước tính chiếm 30--40\,\% thời gian CPU.
+  \item \textbf{PWM mềm tần số thấp.} Do chân IN1/IN2 không trùng chân ra so sánh khả dụng, PWM được tạo bằng ngắt ở \SI{1.95}{\kilo\hertz} -- nằm trong dải nghe được nên động cơ phát tiếng rít; độ rộng xung nhỏ nhất bị giới hạn khoảng 2\,\% bởi độ trễ ngắt.
+  \item \textbf{Độ phân giải đo tốc độ thấp ở vùng tốc độ nhỏ.} Với encoder 20 PPR và cửa sổ \SI{50}{\milli\second}, mỗi bước lượng tử là \SI{15}{rpm} (sai số $\pm10\,\%$ tại \SI{150}{rpm}).
+  \item \textbf{Không đo dòng điện.} DRV8220 không có ngõ ra cảm biến dòng, nên hệ thống không thể điều khiển mô-men, giới hạn dòng theo phần mềm hay phát hiện kẹt trục sớm.
+  \item \textbf{Truyền thông một chiều.} UART chỉ nhận (chân TX trên J3 chưa được dùng), không gửi được dữ liệu đo về máy tính để ghi log hay vẽ đồ thị; việc tinh chỉnh PID phải quan sát qua màn hình.
+  \item \textbf{Tài nguyên MCU hạn chế.} 8\,KB Flash / 1\,KB SRAM, không có FPU, không có giao diện gỡ lỗi khi dùng ArduinoISP; chế độ đã chọn không được lưu vào EEPROM nên mất khi tắt nguồn.
+  \item \textbf{Thiết kế đầu nối.} Cổng nạp J6 không có chân nguồn nên luôn phải cấp \SI{12}{\volt} khi nạp; công suất giới hạn ở khoảng \SI{1}{\ampere} liên tục, chỉ phù hợp động cơ nhỏ.
+\end{enumerate}
+
+\section{Hướng phát triển: \projpro}
+Từ kinh nghiệm thu được với \proj, nhóm đề xuất phiên bản đầy đủ \textbf{\projpro} hướng tới một bộ điều khiển động cơ dùng được trong các ứng dụng công nghiệp nhẹ và robot.
+
+\begin{table}[H]
+\centering\small
+\caption{So sánh \proj{} và phiên bản đề xuất \projpro}
+\label{tab:lite_vs_v1}
+\begin{tabularx}{\linewidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Tiêu chí} & \textbf{\proj} & \textbf{\projpro{} (đề xuất)}\\
+\midrule
+Vi điều khiển & ATmega88PA, 8-bit, \SI{16}{\mega\hertz} & STM32 Cortex-M4 có FPU (ví dụ họ STM32G4), \SI{170}{\mega\hertz}\\
+Giải mã encoder & Phần mềm, Timer1 \SI{80}{\kilo\hertz} & Timer phần cứng chế độ Encoder, bộ lọc đầu vào phần cứng\\
+Tầng công suất & DRV8220, \SI{18}{\volt}/\SI{1.76}{\ampere} & Cầu H dòng lớn có cảm biến dòng tích hợp (ví dụ DRV8874, \SI{37}{\volt}/\SI{6}{\ampere} đỉnh)\\
+Tần số PWM & \SI{1.95}{\kilo\hertz} (PWM mềm) & \SI{20}{\kilo\hertz} PWM phần cứng (ngoài dải nghe)\\
+Vòng điều khiển & Vận tốc (PID + FF) & Nối tầng: dòng điện $\to$ vận tốc $\to$ vị trí\\
+Đo tốc độ & Phương pháp M & Kết hợp M/T, độ phân giải cao ở tốc độ thấp\\
+Truyền thông & UART chỉ nhận & USB-C (CDC), UART hai chiều, RS-485/Modbus RTU, CAN\\
+Giám sát & Màn hình TFT & TFT + phần mềm PC vẽ đồ thị thời gian thực, tự động tinh chỉnh PID\\
+Lưu cấu hình & Biên dịch lại \texttt{config.h} & Lưu tham số vào Flash/EEPROM, chỉnh qua lệnh\\
+Gỡ lỗi & ArduinoISP (chỉ nạp) & SWD với ST-Link: breakpoint, xem biến trực tiếp\\
+Nguồn vào & \SIrange{7}{16}{\volt} & \SIrange{12}{24}{\volt} (mức chuẩn công nghiệp), bảo vệ TVS\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Kiến trúc phần mềm phân lớp và cách tổ chức cấu hình tập trung của \proj{} sẽ được giữ nguyên trong \projpro; phần lớn logic ứng dụng và thuật toán điều khiển có thể tái sử dụng, chỉ cần viết lại lớp driver cho vi điều khiển mới. Đây cũng chính là ý nghĩa của tên gọi ``UniDrive'' -- một nền tảng điều khiển động cơ thống nhất, có thể mở rộng theo từng phiên bản.
