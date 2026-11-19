@@ -41,5 +41,6 @@
 \contentsline {section}{\numberline {2.4}Thiết kế mạch in (PCB)}{17}{section.2.4}%
 \contentsline {subsection}{\numberline {2.4.1}Thông số bo mạch}{17}{subsection.2.4.1}%
 \contentsline {subsection}{\numberline {2.4.2}Bố trí linh kiện (placement)}{17}{subsection.2.4.2}%
-\contentsline {subsection}{\numberline {2.4.3}Đi dây (routing)}{17}{subsection.2.4.3}%
-\contentsline {subsection}{\numberline {2.4.4}Kiểm tra và xuất tệp sản xuất}{18}{subsection.2.4.4}%
+\contentsline {subsection}{\numberline {2.4.3}Đi dây (routing)}{20}{subsection.2.4.3}%
+\contentsline {subsection}{\numberline {2.4.4}Kiểm tra và xuất tệp sản xuất}{20}{subsection.2.4.4}%
+\contentsline {subsubsection}{\numberline {2.4.4.1}Dụng cụ hàn linh kiện}{21}{subsubsection.2.4.4.1}%

@@ -112,7 +112,7 @@ Mạch điều khiển cần đường \SI{5}{\volt} (MCU, encoder, logic) và \
 \begin{equation}
   P_{7805}=(V_{IN}-V_{OUT})\cdot I=(12-5)\times0{,}15=\SI{1.05}{\watt},
 \end{equation}
-đòi hỏi tản nhiệt và lãng phí khoảng 58\,\% năng lượng. Nhóm chọn bộ chuyển đổi \textbf{buck đồng bộ LMR51420} (hiệu suất trên 85\,\%, package SOT-23-6, dòng ra tới \SI{2}{\ampere}, phiên bản \texttt{XF} chạy \SI{500}{\kilo\hertz} ở chế độ FPWM để tần số chuyển mạch cố định, dễ lọc nhiễu). Đường \SI{3.3}{\volt} chỉ cấp cho màn hình nên dùng LDO \textbf{AP2112K-3.3} (\SI{600}{\milli\ampere}, sụt áp thấp) nối sau đường \SI{5}{\volt} -- tổn hao chỉ $(5-3{,}3)\times I_{TFT}$, không đáng kể.
+đòi hỏi tản nhiệt và lãng phí khoảng 58\,\% năng lượng. Nhóm chọn IC \textbf{buck LMR51420} (hiệu suất trên 85\,\%, package SOT-23-6, dòng ra tới \SI{2}{\ampere}, phiên bản \texttt{XF} chạy \SI{500}{\kilo\hertz} ở chế độ FPWM để tần số chuyển mạch cố định, dễ lọc nhiễu). Đường \SI{3.3}{\volt} chỉ cấp cho màn hình nên dùng LDO \textbf{AP2112K-3.3} (\SI{600}{\milli\ampere}, sụt áp thấp) nối sau đường \SI{5}{\volt} -- tổn hao chỉ $(5-3{,}3)\times I_{TFT}$, không đáng kể.
 
 \begin{figure}[H]
 \centering
@@ -182,7 +182,7 @@ Sơ đồ nguyên lý được vẽ trên một trang A4, chia thành các vùng
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.9\linewidth]{figures/Reverse_polarity.png}
-\caption{Mạch chống ngược cực dùng P-MOSFET Q1}
+\caption{Mạch chống ngược cực dùng P-MOSFET CSD25404Q3}
 \label{fig:sch_rpp}
 \end{figure}
 
@@ -190,7 +190,7 @@ Sơ đồ nguyên lý được vẽ trên một trang A4, chia thành các vùng
 \begin{equation}
   V_{OUT}=0{,}6\left(1+\frac{100}{13{,}7}\right)=\SI{4.98}{\volt}.
 \end{equation}
-Cuộn cảm L2 = \SI{10}{\micro\henry} và hai tụ \SI{22}{\micro\farad} (C11, C12) ở ngõ ra được chọn theo bảng thiết kế trong datasheet LMR51420 (Table 9.2) cho $V_{OUT}=\SI{5}{\volt}$, $f_{SW}=\SI{500}{\kilo\hertz}$. Gợn sóng dòng điện qua cuộn cảm:
+Cuộn cảm L2 = \SI{10}{\micro\henry} và hai tụ \SI{22}{\micro\farad} (C11, C12) ở ngõ ra được chọn theo bảng thiết kế trong datasheet LMR51420 (Table 9.2) cho $V_{OUT}=\SI{5}{\volt}$, $f_{SW}=\SI{500}{\kilo\hertz}$. Độ gợn dòng điện cuộn cảm (Inductance Current Ripple):
 \begin{equation}
   \Delta I_L=\frac{V_{OUT}(V_{IN}-V_{OUT})}{V_{IN}\,L\,f_{SW}}=\frac{5\times(12-5)}{12\times10\cdot10^{-6}\times500\cdot10^{3}}\approx\SI{0.58}{\ampere}.
 \end{equation}
@@ -275,11 +275,50 @@ Gia công & Đặt sản xuất tại JLCPCB từ tệp Gerber xuất từ KiCad
 \subsection{Bố trí linh kiện (placement)}
 Bo mạch được chia thành các vùng chức năng rõ ràng nhằm tách biệt dòng công suất khỏi tín hiệu nhạy cảm:
 \begin{itemize}
-  \item \textbf{Vùng nguồn} (cạnh trái): đầu vào J1, MOSFET chống ngược cực Q1, buck U1, LDO U3 và các tụ bulk. Đầu nối nguồn đặt ở mép bo để dễ đấu dây.
-  \item \textbf{Vùng công suất} (góc trên bên phải): DRV8220 (U5), jumper chọn chế độ JP1 và domino động cơ M1 ở mép phải -- đường dòng động cơ ngắn và nằm xa vùng tương tự.
-  \item \textbf{Vùng vi điều khiển} (trung tâm): ATmega88PA (U2) với thạch anh Y1 đặt sát chân XTAL1/\allowbreak XTAL2, các tụ thoát \SI{100}{\nano\farad} đặt sát từng chân cấp nguồn; cổng nạp J6 ngay phía trên MCU.
-  \item \textbf{Vùng giao diện}: header màn hình J2 và IC chuyển mức U4 ở bên trái -- màn hình cắm chồng lên bo; chiết áp RV1, nút RUN/STOP/RESET và LED xếp dọc cạnh dưới để người dùng thao tác; đầu JST encoder J7 và UART J3 gom về cạnh phải.
+  \item \textbf{Vùng nguồn} (cạnh trái): đầu vào J1, MOSFET chống ngược cực Q1, buck U1, LDO U3 và các tụ bulk. Đầu nối nguồn đặt ở mép bo để dễ đấu dây (Hình~\ref{fig:place_power}).
+  \item \textbf{Vùng công suất} (góc trên bên phải): DRV8220 (U5), jumper chọn chế độ JP1 và domino động cơ M1 ở mép phải -- đường dòng động cơ ngắn và nằm xa vùng tương tự (Hình~\ref{fig:place_motor}).
+  \item \textbf{Vùng vi điều khiển} (trung tâm): ATmega88PA (U2) với thạch anh Y1 đặt sát chân XTAL1/\allowbreak XTAL2, các tụ thoát \SI{100}{\nano\farad} đặt sát từng chân cấp nguồn; cổng nạp J6 ngay phía trên MCU (Hình~\ref{fig:place_mcu}).
+  \item \textbf{Vùng giao diện}: header màn hình J2 và IC chuyển mức U4 ở bên trái -- màn hình cắm chồng lên bo; chiết áp RV1, nút RUN/STOP/RESET và LED xếp dọc cạnh dưới để người dùng thao tác; đầu JST encoder J7 và UART J3 gom về cạnh phải (Hình~\ref{fig:place_ui}).
 \end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.65\linewidth}\centering\includegraphics[angle=90,width=\linewidth]{figures/Power_Layout.png}\caption{Layout}\end{subfigure}
+
+\vspace{0.5em}
+\begin{subfigure}{0.65\linewidth}\centering\includegraphics[angle=90,width=\linewidth]{figures/Power_3D.png}\caption{Ảnh 3D}\end{subfigure}
+\caption{Bố trí linh kiện vùng nguồn}
+\label{fig:place_power}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.65\linewidth}\centering\hinh[\linewidth]{figures/Motor_Driver_Layout.png}{Layout vùng công suất (cầu H DRV8220)}\caption{Layout}\end{subfigure}
+
+\vspace{0.5em}
+\begin{subfigure}{0.65\linewidth}\centering\hinh[\linewidth]{figures/Motor_Driver_3D.png}{Ảnh 3D vùng công suất (cầu H DRV8220)}\caption{Ảnh 3D}\end{subfigure}
+\caption{Bố trí linh kiện vùng công suất (cầu H DRV8220)}
+\label{fig:place_motor}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.49\linewidth}\centering\hinh[\linewidth]{figures/MCU_Layout.png}{Layout vùng vi điều khiển}\caption{Layout}\end{subfigure}
+\hfill
+\begin{subfigure}{0.49\linewidth}\centering\hinh[\linewidth]{figures/MCU_3D.png}{Ảnh 3D vùng vi điều khiển}\caption{Ảnh 3D}\end{subfigure}
+\caption{Bố trí linh kiện vùng vi điều khiển}
+\label{fig:place_mcu}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.65\linewidth}\centering\hinh[\linewidth]{figures/UI_Layout.png}{Layout vùng giao diện người dùng}\caption{Layout}\end{subfigure}
+
+\vspace{0.5em}
+\begin{subfigure}{0.65\linewidth}\centering\hinh[\linewidth]{figures/UI_3D.png}{Ảnh 3D vùng giao diện người dùng}\caption{Ảnh 3D}\end{subfigure}
+\caption{Bố trí linh kiện vùng giao diện người dùng}
+\label{fig:place_ui}
+\end{figure}
 
 \subsection{Đi dây (routing)}
 \begin{itemize}
@@ -300,6 +339,48 @@ Bo mạch được chia thành các vùng chức năng rõ ràng nhằm tách bi
 
 \subsection{Kiểm tra và xuất tệp sản xuất}
 Trước khi đặt gia công, thiết kế được kiểm tra bằng ERC (Electrical Rules Check) cho sơ đồ nguyên lý và DRC (Design Rules Check) cho PCB theo năng lực công nghệ của nhà sản xuất (đường/khoảng cách tối thiểu \SI{0.15}{\milli\metre}, lỗ khoan tối thiểu \SI{0.3}{\milli\metre}). Bộ tệp sản xuất gồm Gerber các lớp đồng, mặt nạ hàn, lụa, kem hàn, đường viền bo (Edge.Cuts) và tệp khoan Excellon (\texttt{.drl}).
+
+Trước khi gửi đi gia công, bộ tệp Gerber được mở lại bằng trình xem Gerber (Gerber Viewer) để kiểm tra lần cuối: các lớp đồng, mặt nạ hàn, lụa và lỗ khoan phải chồng khớp nhau, đường viền bo khép kín và không có lớp nào bị thiếu hoặc lệch so với thiết kế (Hình~\ref{fig:gerber}).
+
+\begin{figure}[H]
+\centering
+\hinh[0.85\linewidth]{figures/Gerber_Viewer.png}{Kiểm tra bộ tệp Gerber trên trình xem Gerber}
+\caption{Kiểm tra bộ tệp sản xuất trên Gerber Viewer}
+\label{fig:gerber}
+\end{figure}
+
+\subsubsection{Dụng cụ hàn linh kiện}
+Sau khi nhận bo mạch trần, linh kiện được hàn thủ công tại chỗ. Do phần lớn linh kiện là loại dán bề mặt (SMD) với bước chân nhỏ, phương pháp chính là quét kem hàn lên pad rồi dùng khí nóng để nung chảy (hot-air reflow); mỏ hàn chỉ dùng cho linh kiện xuyên lỗ và sửa mối hàn. Các dụng cụ được sử dụng được liệt kê ở Bảng~\ref{tab:solder_equipment} và Hình~\ref{fig:solder_equipment}.
+
+\begin{table}[H]
+\centering
+\caption{Dụng cụ hàn và lắp ráp linh kiện}
+\label{tab:solder_equipment}
+\begin{tabularx}{\linewidth}{|l|X|}
+\hline
+\textbf{Dụng cụ} & \textbf{Công dụng} \\
+\hline
+Kem hàn Relife RL-403S & Kem hàn dạng ống tiêm \SI{10}{cc}, nhiệt độ nóng chảy \SI{183}{\celsius}; được bơm trực tiếp lên từng pad SMD trước khi đặt linh kiện. \\
+\hline
+Súng bơm kem hàn Relife RL-062A & Gắn với ống kem hàn RL-403S, giúp định lượng và đưa kem hàn lên pad chính xác, đều tay. \\
+\hline
+Trạm khò hàn AIFEN 868D & Thổi khí nóng để nung chảy kem hàn (reflow) cho các linh kiện SMD như IC, điện trở, tụ điện; đồng thời dùng để tháo linh kiện khi cần sửa. \\
+\hline
+Trạm hàn SUNSHINE S3 & Mỏ hàn dùng để hàn linh kiện xuyên lỗ (header, domino, đầu nối), sửa mối hàn thiếu thiếc hoặc bị dính chân (bridge). \\
+\hline
+Nhíp Relife SA-11 & Gắp, đặt và căn chỉnh linh kiện SMD lên vị trí trước và trong khi khò. \\
+\hline
+\end{tabularx}
+\end{table}
+
+Quy trình hàn được thực hiện theo thứ tự: (1) bơm kem hàn lên các pad bằng súng RL-062A; (2) dùng nhíp SA-11 đặt linh kiện SMD vào đúng vị trí và chiều; (3) khò bằng trạm AIFEN 868D tới khi kem hàn chảy và linh kiện tự căn chỉnh vào pad nhờ sức căng bề mặt; (4) hàn các linh kiện xuyên lỗ và kiểm tra, sửa mối hàn bằng trạm hàn SUNSHINE S3.
+
+\begin{figure}[H]
+\centering
+\hinh[0.8\linewidth]{figures/solder_equipment.png}{Ảnh các dụng cụ hàn linh kiện}
+\caption{Các dụng cụ dùng để hàn linh kiện}
+\label{fig:solder_equipment}
+\end{figure}
 
 \begin{figure}[H]
 \centering

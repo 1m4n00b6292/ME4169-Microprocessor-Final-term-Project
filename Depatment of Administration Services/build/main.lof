@@ -9,10 +9,16 @@
 \contentsline {figure}{\numberline {2.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces P MOSFET CSD25404Q3}}{12}{figure.caption.20}%
 \contentsline {figure}{\numberline {2.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces IC chuyển mức logic TXB0106}}{12}{figure.caption.21}%
 \contentsline {figure}{\numberline {2.7}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ nguyên lý \textsc {UniDrive Lite}}}{13}{figure.caption.22}%
-\contentsline {figure}{\numberline {2.8}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Mạch chống ngược cực dùng P-MOSFET Q1}}{14}{figure.caption.24}%
+\contentsline {figure}{\numberline {2.8}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Mạch chống ngược cực dùng P-MOSFET CSD25404Q3}}{14}{figure.caption.24}%
 \contentsline {figure}{\numberline {2.9}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Khối nguồn: buck LMR51420 (\SI {12}{\volt }$\to $\SI {5}{\volt }) và LDO AP2112K (\SI {5}{\volt }$\to $\SI {3.3}{\volt })}}{14}{figure.caption.26}%
 \contentsline {figure}{\numberline {2.10}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bộ lọc nguồn tương tự +5VA cho AVCC}}{15}{figure.caption.29}%
 \contentsline {figure}{\numberline {2.11}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Mạch nút nhấn RUN (SW1), STOP (SW2) và RESET (SW3) với bộ lọc RC}}{15}{figure.caption.31}%
 \contentsline {figure}{\numberline {2.12}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Mạch LED trạng thái khóa bằng MOSFET 2N7002}}{16}{figure.caption.33}%
-\contentsline {figure}{\numberline {2.13}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Layout mạch in \textsc {UniDrive Lite}}}{18}{figure.caption.36}%
-\contentsline {figure}{\numberline {2.14}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bo mạch \textsc {UniDrive Lite}{} sau khi lắp ráp}}{18}{figure.caption.37}%
+\contentsline {figure}{\numberline {2.13}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bố trí linh kiện vùng nguồn}}{18}{figure.caption.36}%
+\contentsline {figure}{\numberline {2.14}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bố trí linh kiện vùng công suất (cầu H DRV8220)}}{18}{figure.caption.37}%
+\contentsline {figure}{\numberline {2.15}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bố trí linh kiện vùng vi điều khiển}}{19}{figure.caption.38}%
+\contentsline {figure}{\numberline {2.16}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bố trí linh kiện vùng giao diện người dùng}}{19}{figure.caption.39}%
+\contentsline {figure}{\numberline {2.17}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Layout mạch in \textsc {UniDrive Lite}}}{20}{figure.caption.40}%
+\contentsline {figure}{\numberline {2.18}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Kiểm tra bộ tệp sản xuất trên Gerber Viewer}}{21}{figure.caption.41}%
+\contentsline {figure}{\numberline {2.19}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Các dụng cụ dùng để hàn linh kiện}}{22}{figure.caption.43}%
+\contentsline {figure}{\numberline {2.20}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bo mạch \textsc {UniDrive Lite}{} sau khi lắp ráp}}{22}{figure.caption.44}%
