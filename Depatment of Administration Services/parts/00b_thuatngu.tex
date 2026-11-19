@@ -1,0 +1,146 @@
+%!TEX root = ../main.tex
+%!TEX program = xelatex
+% =====================================================================
+%  00b - DANH MỤC THUẬT NGỮ VÀ TỪ VIẾT TẮT
+% =====================================================================
+\chapter*{Danh mục thuật ngữ và từ viết tắt}
+\addcontentsline{toc}{chapter}{Danh mục thuật ngữ và từ viết tắt}
+\markboth{Danh mục thuật ngữ và từ viết tắt}{}
+
+Trong báo cáo, một số thuật ngữ kỹ thuật được giữ nguyên tiếng Anh vì đây là cách gọi thông dụng trong tài liệu (datasheet), phần mềm thiết kế và cộng đồng kỹ thuật. Bảng dưới đây giải thích ngắn gọn ý nghĩa của các từ viết tắt và thuật ngữ đó theo thứ tự chữ cái.
+
+
+% ---------------------------------------------------------------------
+\section*{Từ viết tắt}
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash\bfseries}p{2.7cm}>{\raggedright\arraybackslash\itshape}p{4.6cm}>{\raggedright\arraybackslash}p{7.6cm}@{}}
+\toprule
+\normalfont\bfseries Viết tắt & \normalfont\bfseries Tiếng Anh & \textbf{Ý nghĩa}\\
+\midrule\endfirsthead
+\toprule
+\normalfont\bfseries Viết tắt & \normalfont\bfseries Tiếng Anh & \textbf{Ý nghĩa}\\
+\midrule\endhead
+\bottomrule\endfoot
+ADC & Analog-to-Digital Converter & Bộ chuyển đổi tương tự -- số; dùng để đọc chiết áp đặt tốc độ\\
+AGV / AMR & Automated Guided Vehicle / Autonomous Mobile Robot & Xe tự hành dẫn hướng / robot di động tự hành\\
+AREF & Analog Reference & Chân điện áp tham chiếu của bộ ADC\\
+AVCC & Analog V\textsubscript{CC} & Chân cấp nguồn cho khối tương tự (ADC) của MCU\\
+AVR & -- & Họ vi điều khiển 8 bit của Microchip (trước đây là Atmel)\\
+BJT & Bipolar Junction Transistor & Transistor lưỡng cực\\
+BOM & Bill of Materials & Danh sách linh kiện của bo mạch\\
+CAN & Controller Area Network & Bus truyền thông nối tiếp dùng trong ô tô và công nghiệp\\
+CKDIV8 & Clock Divide by 8 & Bit fuse chia tần số xung nhịp hệ thống cho 8\\
+CNC & Computer Numerical Control & Máy gia công điều khiển số\\
+CPR & Counts Per Revolution & Số xung đếm được trên một vòng quay (sau khi giải mã cạnh)\\
+CPU & Central Processing Unit & Bộ xử lý trung tâm\\
+CTC & Clear Timer on Compare Match & Chế độ Timer tự xóa về 0 khi đạt giá trị so sánh, tạo ngắt định kỳ\\
+DC & Direct Current & Dòng điện một chiều\\
+DRC / ERC & Design Rule Check / Electrical Rule Check & Kiểm tra luật thiết kế PCB / kiểm tra luật điện trên sơ đồ nguyên lý\\
+EDA & Electronic Design Automation & Phần mềm thiết kế điện tử (ví dụ KiCad)\\
+EEPROM & Electrically Erasable Programmable ROM & Bộ nhớ không mất dữ liệu, ghi/xóa được bằng điện\\
+FPU & Floating-Point Unit & Khối tính toán số thực dấu phẩy động bằng phần cứng\\
+FPWM & Forced PWM & Chế độ bộ buck luôn đóng cắt ở tần số cố định, kể cả khi tải nhẹ\\
+GND & Ground & Mass, điểm điện thế chuẩn \SI{0}{\volt}\\
+GPIO & General-Purpose Input/Output & Chân vào/ra đa dụng của vi điều khiển\\
+HAL & Hardware Abstraction Layer & Lớp trừu tượng hóa phần cứng\\
+IC & Integrated Circuit & Vi mạch tích hợp\\
+ISP & In-System Programming & Nạp chương trình trực tiếp trên bo mạch qua giao tiếp SPI, không cần bootloader\\
+ISR & Interrupt Service Routine & Chương trình phục vụ ngắt\\
+LDO & Low-Dropout Regulator & Bộ ổn áp tuyến tính có điện áp rơi thấp\\
+LED & Light-Emitting Diode & Điốt phát quang\\
+MCU & Microcontroller Unit & Vi điều khiển\\
+MISO / MOSI / SCK & Master In Slave Out / Master Out Slave In / Serial Clock & Các đường tín hiệu của giao tiếp SPI\\
+Modbus RTU & Modbus Remote Terminal Unit & Giao thức truyền thông công nghiệp dạng nhị phân, thường chạy trên RS-485\\
+MOSFET & Metal-Oxide-Semiconductor Field-Effect Transistor & Transistor hiệu ứng trường; dùng làm khóa đóng cắt và chống ngược cực\\
+nSLEEP & -- & Chân đưa DRV8220 vào chế độ ngủ (tích cực mức thấp)\\
+OCP & Overcurrent Protection & Bảo vệ quá dòng\\
+OE & Output Enable & Chân cho phép đầu ra (của TXB0106)\\
+PCB & Printed Circuit Board & Bảng mạch in\\
+PH/EN & Phase/Enable & Chế độ điều khiển cầu H bằng một chân chiều quay và một chân PWM\\
+PID & Proportional-Integral-Derivative & Bộ điều khiển tỉ lệ -- tích phân -- vi phân\\
+PLC & Programmable Logic Controller & Bộ điều khiển logic khả trình\\
+PPR & Pulses Per Revolution & Số xung trên một vòng quay của một kênh encoder\\
+PWM & Pulse Width Modulation & Điều chế độ rộng xung\\
+RAM / SRAM & (Static) Random-Access Memory & Bộ nhớ truy cập ngẫu nhiên (tĩnh), mất dữ liệu khi mất nguồn\\
+rpm & Revolutions Per Minute & Vòng/phút\\
+RS-485 & Recommended Standard 485 & Chuẩn truyền thông nối tiếp vi sai, chống nhiễu tốt, truyền xa\\
+SMD & Surface-Mount Device & Linh kiện dán bề mặt\\
+SOT, SOD, TQFP, VQFN, VSON, WSON & -- & Tên các kiểu vỏ (package) linh kiện dán bề mặt\\
+SPI & Serial Peripheral Interface & Giao tiếp nối tiếp đồng bộ; dùng cho màn hình TFT và nạp ISP\\
+SWD & Serial Wire Debug & Giao tiếp nạp và gỡ lỗi 2 dây của vi điều khiển ARM\\
+TFT & Thin-Film Transistor & Màn hình LCD ma trận tích cực dùng transistor màng mỏng\\
+TP & Test Point & Điểm đo trên bo mạch\\
+TSD & Thermal Shutdown & Tự ngắt khi quá nhiệt\\
+TVS & Transient Voltage Suppressor & Điốt triệt xung quá áp\\
+UART / USART & Universal (Synchronous/) Asynchronous Receiver-Transmitter & Bộ thu phát nối tiếp (đồng bộ/) không đồng bộ\\
+USB & Universal Serial Bus & Chuẩn kết nối nối tiếp đa năng\\
+UVLO & Undervoltage Lockout & Khóa hoạt động khi điện áp nguồn thấp hơn ngưỡng\\
+\end{longtable}
+}
+
+% ---------------------------------------------------------------------
+\section*{Thuật ngữ tiếng Anh}
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash\bfseries}p{3.6cm}>{\raggedright\arraybackslash}p{11.3cm}@{}}
+\toprule
+\normalfont\bfseries Thuật ngữ & \textbf{Ý nghĩa}\\
+\midrule\endfirsthead
+\toprule
+\normalfont\bfseries Thuật ngữ & \textbf{Ý nghĩa}\\
+\midrule\endhead
+\bottomrule\endfoot
+Anti-windup & Chống bão hòa tích phân: ngăn khâu tích phân của PID tăng quá mức khi đầu ra đã bị giới hạn\\
+Bare-metal & Lập trình trực tiếp trên thanh ghi phần cứng, không dùng hệ điều hành hay thư viện trung gian\\
+Baud rate & Tốc độ truyền của UART, tính bằng bit/giây\\
+Bootloader & Chương trình nhỏ nằm sẵn trong Flash, cho phép nạp firmware qua UART/USB\\
+Bootstrap (tụ) & Tụ mồi cấp điện áp cho cực cổng MOSFET phía cao trong bộ buck\\
+Brake / Coast & Hãm (hai đầu động cơ bị nối tắt) / thả trôi (hai đầu động cơ để hở)\\
+Breakpoint & Điểm dừng chương trình khi gỡ lỗi\\
+Brushed DC motor & Động cơ DC có chổi than\\
+Buck converter & Bộ biến đổi DC-DC hạ áp kiểu xung\\
+Build / Upload / Verify & Biên dịch / nạp / kiểm tra lại chương trình đã nạp\\
+Bulk capacitor & Tụ dung lượng lớn dự trữ năng lượng trên đường nguồn\\
+Closed-loop / Open-loop & Điều khiển vòng kín (có phản hồi) / vòng hở (không phản hồi)\\
+Conditional integration & Tích phân có điều kiện: chỉ cộng dồn sai số khi đầu ra chưa bão hòa\\
+Copper pour & Vùng đổ đồng trên PCB\\
+Datasheet & Tài liệu thông số kỹ thuật của linh kiện do nhà sản xuất phát hành\\
+Decoupling capacitor & Tụ thoát (tụ lọc nguồn) đặt sát chân nguồn của IC\\
+Driver & Mạch/IC công suất điều khiển trực tiếp động cơ; cũng chỉ module phần mềm điều khiển một ngoại vi\\
+Duty cycle & Hệ số công tác (tỉ lệ thời gian mức cao trong một chu kỳ PWM)\\
+Encoder (quadrature) & Cảm biến vị trí/tốc độ dạng xung, hai kênh A--B lệch pha \ang{90}\\
+Exposed pad & Pad tản nhiệt lộ ra ở đáy vỏ IC\\
+Fast PWM & Chế độ PWM của Timer AVR, bộ đếm chỉ đếm lên rồi tràn\\
+Feed-forward & Bù thuận: thành phần điều khiển tính trực tiếp từ giá trị đặt, không đợi sai số\\
+Firmware & Chương trình chạy trên vi điều khiển\\
+Firmware stack-up & Cách tổ chức firmware thành các lớp (driver, điều khiển, ứng dụng)\\
+Footprint & Hình dạng pad hàn của linh kiện trên PCB\\
+Fuse (AVR) & Các bit cấu hình của AVR (nguồn xung nhịp, bộ chia, ...), ghi qua ISP\\
+Gerber & Định dạng tệp chuẩn để gửi thiết kế PCB đi sản xuất\\
+Header / Jumper & Hàng chân cắm / cầu nối dùng để chọn cấu hình\\
+Host test / Mock & Kiểm thử firmware trên máy tính / tệp giả lập phần cứng (thanh ghi) dùng khi kiểm thử\\
+Interrupt & Ngắt\\
+Layout / Placement / Routing & Thiết kế mạch in / sắp xếp linh kiện / đi dây trên PCB\\
+Level shifter & Mạch chuyển mức điện áp logic (ví dụ \SI{5}{\volt}$\leftrightarrow$\SI{3.3}{\volt})\\
+Odometry & Ước lượng quãng đường/vị trí dựa trên số vòng quay của bánh xe\\
+Polling & Thăm dò: chương trình đọc trạng thái định kỳ thay vì dùng ngắt\\
+Potentiometer & Chiết áp\\
+Q8 / Q16 & Số dấu phẩy tĩnh có 8/16 bit phần thập phân (nhân với $2^8$ / $2^{16}$)\\
+Ramp / Setpoint ramp & Giới hạn tốc độ thay đổi của giá trị đặt (giới hạn gia tốc)\\
+Reset & Khởi động lại vi điều khiển\\
+Ripple & Gợn sóng điện áp trên đường nguồn\\
+Schematic & Sơ đồ nguyên lý\\
+Serial Monitor & Cửa sổ giao tiếp UART trên máy tính (PlatformIO/Arduino IDE)\\
+Setpoint & Giá trị đặt\\
+Silkscreen / Solder mask / Paste & Lớp in lụa / mặt nạ hàn / kem hàn trên PCB\\
+Slow decay & Chế độ suy giảm dòng chậm: dòng động cơ tuần hoàn qua hai MOSFET phía thấp\\
+Smoke test & Lần cấp nguồn đầu tiên để kiểm tra bo mạch không bị chập, cháy\\
+Stencil & Khuôn in kem hàn\\
+Stitching via & Via khâu nối các vùng đồng GND giữa hai lớp\\
+Super-loop & Kiến trúc firmware gồm một vòng lặp chính vô hạn kết hợp ngắt, không dùng hệ điều hành\\
+Tachometer & Máy phát tốc, cảm biến đo tốc độ quay\\
+Timer & Bộ định thời/bộ đếm phần cứng của vi điều khiển\\
+Via & Lỗ xuyên nối các lớp đồng của PCB\\
+Winding & Cuộn dây (của động cơ)\\
+Zener diode & Điốt ổn áp; dùng để kẹp điện áp $V_{GS}$ của MOSFET\\
+\end{longtable}
+}

@@ -1,9 +1,18 @@
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {1.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Quy trình thiết kế phần cứng \textsc {UniDrive Lite}}}{1}{figure.caption.4}%
-\contentsline {figure}{\numberline {1.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces MCU ATmega88PA}}{2}{figure.caption.6}%
-\contentsline {figure}{\numberline {1.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces IC cầu H DRV8220}}{3}{figure.caption.8}%
-\contentsline {figure}{\numberline {1.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces IC buck LMR51420 và LDO AP2112K}}{4}{figure.caption.9}%
-\contentsline {figure}{\numberline {1.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces P MOSFET CSD25404Q3}}{5}{figure.caption.11}%
-\contentsline {figure}{\numberline {1.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces IC chuyển mức logic TXB0106}}{5}{figure.caption.12}%
-\contentsline {figure}{\numberline {1.7}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Layout mạch in \textsc {UniDrive Lite}}}{8}{figure.caption.20}%
-\contentsline {figure}{\numberline {1.8}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bo mạch \textsc {UniDrive Lite}{} sau khi lắp ráp}}{9}{figure.caption.21}%
+\contentsline {figure}{\numberline {1.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ khối phần cứng của \textsc {UniDrive Lite}}}{3}{figure.caption.5}%
+\contentsline {figure}{\numberline {1.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Mô hình 3D bo mạch \textsc {UniDrive Lite}{} (xuất từ KiCad)}}{4}{figure.caption.6}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Quy trình thiết kế phần cứng \textsc {UniDrive Lite}}}{8}{figure.caption.13}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces MCU ATmega88PA}}{9}{figure.caption.15}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces IC cầu H DRV8220}}{10}{figure.caption.17}%
+\contentsline {figure}{\numberline {2.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces IC buck LMR51420 và LDO AP2112K}}{11}{figure.caption.18}%
+\contentsline {figure}{\numberline {2.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces P MOSFET CSD25404Q3}}{12}{figure.caption.20}%
+\contentsline {figure}{\numberline {2.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces IC chuyển mức logic TXB0106}}{12}{figure.caption.21}%
+\contentsline {figure}{\numberline {2.7}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ nguyên lý \textsc {UniDrive Lite}}}{13}{figure.caption.22}%
+\contentsline {figure}{\numberline {2.8}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Mạch chống ngược cực dùng P-MOSFET Q1}}{14}{figure.caption.24}%
+\contentsline {figure}{\numberline {2.9}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Khối nguồn: buck LMR51420 (\SI {12}{\volt }$\to $\SI {5}{\volt }) và LDO AP2112K (\SI {5}{\volt }$\to $\SI {3.3}{\volt })}}{14}{figure.caption.26}%
+\contentsline {figure}{\numberline {2.10}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bộ lọc nguồn tương tự +5VA cho AVCC}}{15}{figure.caption.29}%
+\contentsline {figure}{\numberline {2.11}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Mạch nút nhấn RUN (SW1), STOP (SW2) và RESET (SW3) với bộ lọc RC}}{15}{figure.caption.31}%
+\contentsline {figure}{\numberline {2.12}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Mạch LED trạng thái khóa bằng MOSFET 2N7002}}{16}{figure.caption.33}%
+\contentsline {figure}{\numberline {2.13}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Layout mạch in \textsc {UniDrive Lite}}}{18}{figure.caption.36}%
+\contentsline {figure}{\numberline {2.14}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bo mạch \textsc {UniDrive Lite}{} sau khi lắp ráp}}{18}{figure.caption.37}%

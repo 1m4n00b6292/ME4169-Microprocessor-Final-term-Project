@@ -44,6 +44,66 @@ Sơ đồ nguyên lý đầy đủ của \proj{} (xuất từ KiCad) được tr
 \includegraphics[height=\linewidth,angle=90,page=1]{sch/VIXULY_schematic.pdf}
 \end{center}
 
+\chapter{Danh sách linh kiện đầy đủ (BOM)}
+\label{app:bom}
+
+Bảng~\ref{tab:bom} là danh sách linh kiện đầy đủ của \proj{}, bao gồm cả linh kiện thụ động, nút nhấn và đầu nối, được trích trực tiếp từ sơ đồ nguyên lý KiCad và nhóm theo khối chức năng.
+
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{3.5cm}>{\raggedright\arraybackslash}p{2.8cm}c>{\raggedright\arraybackslash}p{5.1cm}@{}}
+\caption{Danh sách linh kiện đầy đủ (BOM) của \proj}\label{tab:bom}\\
+\toprule
+\textbf{Ký hiệu} & \textbf{Giá trị / Mã} & \textbf{Vỏ (footprint)} & \textbf{SL} & \textbf{Chức năng}\\
+\midrule\endfirsthead
+\toprule
+\textbf{Ký hiệu} & \textbf{Giá trị / Mã} & \textbf{Vỏ (footprint)} & \textbf{SL} & \textbf{Chức năng}\\
+\midrule\endhead
+\bottomrule\endfoot
+\multicolumn{5}{@{}l}{\cellcolor{blkfill}\textit{Khối xử lý trung tâm}}\\
+U2 & ATmega88PA-A & TQFP-32 & 1 & Vi điều khiển chính\\
+Y1 & \SI{16}{\mega\hertz} & SMD 3225 & 1 & Thạch anh dao động\\
+C7, C8 & \SI{22}{\pico\farad} & 0603 & 2 & Tụ tải thạch anh\\
+L1 / R1 & \SI{10}{\micro\henry} / \SI{22}{\ohm} & 0603 & 2 & Lọc nguồn AVCC (+5VA)\\
+C1--C3, C6 & \SI{100}{\nano\farad}, \SI{10}{\nano\farad} & 0603 & 4 & Tụ thoát VCC/AVCC/AREF\\
+SW3, R6, C21 & Nút nhấn, \SI{10}{\kilo\ohm}, \SI{100}{\nano\farad} & B3F, 0603 & 3 & Mạch RESET\\
+\multicolumn{5}{@{}l}{\cellcolor{pwrfill}\textit{Khối nguồn và bảo vệ}}\\
+Q1 & CSD25404Q3 & VSON-8 3,3$\times$3,3 & 1 & P-MOSFET chống ngược cực\\
+D1 & BZT52C10 & SOD-123 & 1 & Zener kẹp $V_{GS}$ của Q1\\
+R2 & \SI{100}{\kilo\ohm} & 0603 & 1 & Điện trở cực cổng Q1\\
+U1 & LMR51420XFDDCR & SOT-23-6 & 1 & Buck đồng bộ \SI{12}{\volt}$\to$\SI{5}{\volt}\\
+L2 & \SI{10}{\micro\henry} & IHLP-1616 & 1 & Cuộn cảm buck\\
+R5, R7 & \SI{100}{\kilo\ohm}, \SI{13.7}{\kilo\ohm} & 0603 & 2 & Cầu phân áp hồi tiếp (FB)\\
+C9, C10, C11, C12 & \SI{100}{\nano\farad}, \SI{2.2}{\micro\farad}, 2$\times$\SI{22}{\micro\farad} & 0603/1206 & 4 & Bootstrap, tụ vào, tụ ra\\
+U3 & AP2112K-3.3 & SOT-23-5 & 1 & LDO \SI{3.3}{\volt} / \SI{600}{\milli\ampere}\\
+C13, C14 & \SI{22}{\micro\farad} & 1206 & 2 & Tụ vào/ra LDO\\
+C4, C17 & \SI{220}{\micro\farad} & Hóa 6,3$\times$7,7 & 2 & Tụ bulk bus \SI{12}{\volt}\\
+\multicolumn{5}{@{}l}{\cellcolor{blkfill}\textit{Khối công suất}}\\
+U5 & DRV8220DSG & WSON-8 2$\times$2 & 1 & Cầu H \SI{18}{\volt}/\SI{1.76}{\ampere}\\
+JP1, R10 & Jumper hàn, \SI{10}{\kilo\ohm} & -- & 2 & Chọn chế độ PWM / PH-EN\\
+C18 & \SI{100}{\nano\farad} & 0603 & 1 & Tụ thoát VM\\
+M1 & Domino 2 chân & MKDS 5,08 & 1 & Đầu ra động cơ\\
+\multicolumn{5}{@{}l}{\cellcolor{iofill}\textit{Khối giao diện}}\\
+U4 & TXB0106RGY & VQFN-16 & 1 & Chuyển mức \SI{5}{\volt}$\leftrightarrow$\SI{3.3}{\volt} cho TFT\\
+R9, R12 & \SI{30.1}{\kilo\ohm}, \SI{60.4}{\kilo\ohm} & 0603 & 2 & Phân áp chân OE\\
+C15, C16 & \SI{100}{\nano\farad} & 0603 & 2 & Tụ thoát VCCA/VCCB\\
+RV1 & Chiết áp Alps RK097 & -- & 1 & Đặt tốc độ\\
+SW1, SW2 & Nút nhấn Omron B3F & -- & 2 & Nút RUN, STOP\\
+R3, R4, C19, C20 & \SI{10}{\kilo\ohm}, \SI{100}{\nano\farad} & 0603 & 4 & Kéo xuống + lọc RC nút nhấn\\
+D2, D3 & LED & 1206 & 2 & LED STOP, RUN\\
+Q2, Q3 & 2N7002 & SOT-23 & 2 & Khóa LED\\
+R8, R11, R13--R16 & \SI{10}{\kilo\ohm}, \SI{22}{\ohm} & 0603 & 6 & Trở hạn dòng LED, trở cổng\\
+\multicolumn{5}{@{}l}{\cellcolor{swfill}\textit{Đầu nối và cơ khí}}\\
+J1 & Domino 2 chân & MKDS 5,08 & 1 & Đầu vào nguồn \SI{12}{\volt}\\
+J2 & Header cái 1$\times$8 & 2,54 mm & 1 & Module TFT WeAct ST7735\\
+J3 & JST-XH 4 chân & 2,50 mm & 1 & UART\\
+J6 & JST-XH 5 chân & 2,50 mm & 1 & Nạp ISP\\
+J7 & JST-XH 4 chân & 2,50 mm & 1 & Encoder\\
+J4, J5 & Header 1$\times$3 & 2,54 mm & 2 & Đầu chờ +5V / GND\\
+TP1--TP7 & Test point & $\varnothing$\SI{1}{\milli\metre} & 7 & Điểm đo\\
+H1--H4 & Lỗ M3 & $\varnothing$\SI{3.2}{\milli\metre} & 4 & Lỗ bắt vít\\
+\end{longtable}
+}
+
 \chapter{Layout mạch in}
 \label{app:layout}
 

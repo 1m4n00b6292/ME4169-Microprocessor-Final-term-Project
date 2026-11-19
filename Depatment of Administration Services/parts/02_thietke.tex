@@ -72,7 +72,7 @@ Giá thành & Thấp & Trung bình & Trung bình\\
 \hfill
 \begin{subfigure}{0.49\linewidth}\centering\hinh[\linewidth]{figures/ATmega88PA_Back.jpg}{Ảnh MCU ATmega88PA mặt dưới}\caption{Mặt dưới}\end{subfigure}
 \caption{MCU ATmega88PA}
-\label{fig:3d}
+\label{fig:ATmega88PA}
 \end{figure}
 
 Nhóm chọn \textbf{ATmega88PA} vì: (i) cùng họ AVR với nội dung giảng dạy, tương thích chân với ATmega328P nên có thể nâng cấp bộ nhớ mà không sửa PCB; (ii) hoạt động ở \SI{5}{\volt}, tương thích trực tiếp với encoder, nút nhấn và đầu vào logic của DRV8220; (iii) chi phí thấp. Bộ nhớ 8\,KB Flash là một \emph{thử thách có chủ đích}: buộc nhóm phải viết firmware tối giản, thao tác trực tiếp thanh ghi thay vì dùng thư viện Arduino, vốn rất tốn dung lượng flash.
@@ -108,11 +108,11 @@ Chế độ ngủ & Không & Có & Có (dòng nA)\\
 \textbf{DRV8220} được chọn vì phù hợp nguồn \SI{12}{\volt} (TB6612 chỉ tới \SI{13.5}{\volt}, sát giới hạn), có đầy đủ bảo vệ quá dòng, quá nhiệt, thấp áp, kích thước rất nhỏ (WSON-8 2x2mm), và có chân \texttt{nSLEEP} để ngắt hẳn tầng công suất -- đáp ứng yêu cầu R6. Ngoài ra, DRV8220 hỗ trợ hai chế độ giao tiếp IN1/IN2 (PWM) và PH/EN, được chọn bằng chân MODE; nhóm bố trí jumper hàn \textbf{JP1} cùng điện trở kéo xuống R10 để có thể chuyển chế độ mà không cần sửa mạch.
 
 \subsection{Nguồn: buck LMR51420 + LDO AP2112K}
-Mạch điều khiển cần đường \SI{5}{\volt} (MCU, encoder, logic) và \SI{3.3}{\volt} (màn hình TFT). Với dòng tải ước tính \SI{150}{\milli\ampere} trên ray \SI{5}{\volt}, nếu dùng ổn áp tuyến tính 7805 thì công suất tiêu tán:
+Mạch điều khiển cần đường \SI{5}{\volt} (MCU, encoder, logic) và \SI{3.3}{\volt} (màn hình TFT). Với dòng tải ước tính \SI{150}{\milli\ampere} trên đường \SI{5}{\volt}, nếu dùng ổn áp tuyến tính 7805 thì công suất tiêu tán:
 \begin{equation}
   P_{7805}=(V_{IN}-V_{OUT})\cdot I=(12-5)\times0{,}15=\SI{1.05}{\watt},
 \end{equation}
-đòi hỏi tản nhiệt và lãng phí khoảng 58\,\% năng lượng. Nhóm chọn bộ chuyển đổi \textbf{buck đồng bộ LMR51420} (hiệu suất trên 85\,\%, package SOT-23-6, dòng ra tới \SI{2}{\ampere}, phiên bản \texttt{XF} chạy \SI{500}{\kilo\hertz} ở chế độ FPWM để tần số chuyển mạch cố định, dễ lọc nhiễu). Đường \SI{3.3}{\volt} chỉ cấp cho màn hình nên dùng LDO \textbf{AP2112K-3.3} (\SI{600}{\milli\ampere}, sụt áp thấp) nối sau ray \SI{5}{\volt} -- tổn hao chỉ $(5-3{,}3)\times I_{TFT}$, không đáng kể.
+đòi hỏi tản nhiệt và lãng phí khoảng 58\,\% năng lượng. Nhóm chọn bộ chuyển đổi \textbf{buck đồng bộ LMR51420} (hiệu suất trên 85\,\%, package SOT-23-6, dòng ra tới \SI{2}{\ampere}, phiên bản \texttt{XF} chạy \SI{500}{\kilo\hertz} ở chế độ FPWM để tần số chuyển mạch cố định, dễ lọc nhiễu). Đường \SI{3.3}{\volt} chỉ cấp cho màn hình nên dùng LDO \textbf{AP2112K-3.3} (\SI{600}{\milli\ampere}, sụt áp thấp) nối sau đường \SI{5}{\volt} -- tổn hao chỉ $(5-3{,}3)\times I_{TFT}$, không đáng kể.
 
 \begin{figure}[H]
 \centering
@@ -170,6 +170,22 @@ Module TFT WeAct ST7735 làm việc ở mức logic \SI{3.3}{\volt}, trong khi A
 
 Sơ đồ nguyên lý được vẽ trên một trang A4, chia thành các vùng khối có tiêu đề theo đúng sơ đồ khối ở Hình~\ref{fig:sodokhoi}: \emph{Reverse Polarity Protection}, \emph{Power}, \emph{MCU}, \emph{IO}, \emph{Motor Driver}, \emph{LEDs}, \emph{Level Shifter}, \emph{Debug/UART/Encoder}. Sơ đồ đầy đủ được trình bày tại Phụ lục~\ref{app:schematic}. Một số tính toán chính:
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{sch/SCH_PIC.png}
+\caption{Sơ đồ nguyên lý \proj}
+\label{fig:schematic}
+\end{figure}
+
+\paragraph{Mạch chống ngược cực.} P-MOSFET Q1 (CSD25404Q3) được đặt nối tiếp trên đường +12V từ đầu nối J1. Cực cổng được kéo xuống GND qua R2 (\SI{100}{\kilo\ohm}) nên khi cấp nguồn đúng cực, $V_{GS}\approx-\SI{12}{\volt}$ và MOSFET dẫn hoàn toàn; khi cắm ngược cực, $V_{GS}\ge0$ và MOSFET khóa, bảo vệ toàn bộ mạch phía sau. Zener D1 (BZT52C10) kẹp $|V_{GS}|$ ở \SI{10}{\volt}, dưới giới hạn tối đa của Q1. Tụ C5 (\SI{100}{\nano\farad}) và tụ hóa C4 (\SI{220}{\micro\farad}) lọc và dự trữ năng lượng cho bus +12V.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{figures/Reverse_polarity.png}
+\caption{Mạch chống ngược cực dùng P-MOSFET Q1}
+\label{fig:sch_rpp}
+\end{figure}
+
 \paragraph{Điện áp ra của buck.} Với $V_{FB}=\SI{0.6}{\volt}$, $R_5=\SI{100}{\kilo\ohm}$ (FB lên +5V), $R_7=\SI{13.7}{\kilo\ohm}$ (FB xuống GND):
 \begin{equation}
   V_{OUT}=0{,}6\left(1+\frac{100}{13{,}7}\right)=\SI{4.98}{\volt}.
@@ -179,9 +195,25 @@ Cuộn cảm L2 = \SI{10}{\micro\henry} và hai tụ \SI{22}{\micro\farad} (C11,
   \Delta I_L=\frac{V_{OUT}(V_{IN}-V_{OUT})}{V_{IN}\,L\,f_{SW}}=\frac{5\times(12-5)}{12\times10\cdot10^{-6}\times500\cdot10^{3}}\approx\SI{0.58}{\ampere}.
 \end{equation}
 
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{figures/Power.png}
+\caption{Khối nguồn: buck LMR51420 (\SI{12}{\volt}$\to$\SI{5}{\volt}) và LDO AP2112K (\SI{5}{\volt}$\to$\SI{3.3}{\volt})}
+\label{fig:sch_power}
+\end{figure}
+
 \paragraph{Mạch dao động thạch anh.} Tụ tải C7, C8 = \SI{22}{\pico\farad}; với điện dung ký sinh $C_{stray}\approx\SI{5}{\pico\farad}$, điện dung tải tương đương $C_L=\frac{22\times22}{22+22}+5=\SI{16}{\pico\farad}$, phù hợp với thạch anh \SI{16}{\mega\hertz} thông dụng.
 
-\paragraph{Nguồn tương tự AVCC.} Ray +5VA cấp cho AVCC được tách khỏi +5V qua cuộn cảm L1 (\SI{10}{\micro\henry}) / điện trở R1 (\SI{22}{\ohm}) và tụ C3, tạo bộ lọc thông thấp giảm nhiễu chuyển mạch từ buck và cầu H vào ADC. Chân AREF được thoát xuống đất qua C6 (\SI{10}{\nano\farad}).
+\paragraph{Nguồn tương tự AVCC.} Nguồn +5VA cấp cho AVCC được tách khỏi +5V qua cuộn cảm L1 (\SI{10}{\micro\henry}) / điện trở R1 (\SI{22}{\ohm}) và tụ C3, tạo bộ lọc thông thấp giảm nhiễu chuyển mạch từ buck và cầu H vào ADC. Chân AREF được thoát xuống đất qua C6 (\SI{10}{\nano\farad}).
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\linewidth]{figures/AVCC.png}
+\caption{Bộ lọc nguồn tương tự +5VA cho AVCC}
+\label{fig:sch_avcc}
+\end{figure}
 
 \paragraph{Nút nhấn.} Nút RUN (SW1) và STOP (SW2) nối lên +5V (tích cực mức cao), có điện trở kéo xuống \SI{10}{\kilo\ohm} và tụ \SI{100}{\nano\farad} tạo bộ lọc RC phần cứng với hằng số thời gian
 \begin{equation}
@@ -189,11 +221,31 @@ Cuộn cảm L2 = \SI{10}{\micro\henry} và hai tụ \SI{22}{\micro\farad} (C11,
 \end{equation}
 kết hợp với bộ chống dội phần mềm \SI{20}{\milli\second} trong firmware.
 
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.35\linewidth]{figures/Button.png}
+\caption{Mạch nút nhấn RUN (SW1), STOP (SW2) và RESET (SW3) với bộ lọc RC}
+\label{fig:sch_button}
+\end{figure}
+
 \paragraph{LED trạng thái.} Mỗi LED được khóa bởi một MOSFET kênh N 2N7002 (Q2, Q3) ở phía thấp; cực cổng nối với chân GPIO qua \SI{22}{\ohm} và kéo xuống \SI{10}{\kilo\ohm} để LED tắt khi MCU đang reset. Dòng qua LED với trở hạn dòng \SI{10}{\kilo\ohm}:
 \begin{equation}
   I_{LED}=\frac{V_{CC}-V_F}{R}\approx\frac{5-2}{10\cdot10^{3}}=\SI{0.3}{\milli\ampere},
 \end{equation}
-đủ sáng để báo hiệu với LED hiệu suất cao và giảm tải cho ray nguồn.
+đủ sáng để báo hiệu với LED hiệu suất cao và giảm tải cho phần nguồn.
+
+\begin{ghichu}[Vì sao R13 và R16 được đánh dấu DNP?]
+Q2, Q3 dùng chung một footprint SOT-23 cho \textbf{hai phương án linh kiện}: MOSFET kênh N (2N7002) hoặc transistor BJT NPN (ví dụ MMBT3904). Hai loại này có sơ đồ chân tương thích trên vỏ SOT-23 (chân 1: G/B, chân 2: S/E, chân 3: D/C), nên có thể thay thế cho nhau mà không phải sửa PCB, tùy linh kiện sẵn có khi lắp ráp. R13 và R16 (\SI{10}{\kilo\ohm}, nối cực điều khiển xuống GND) chỉ cần thiết với một trong hai phương án, nên mặc định được đánh dấu \textbf{DNP} (\emph{Do Not Populate} -- không hàn) và chỉ hàn khi cần, đúng như ghi chú trên sơ đồ nguyên lý: \emph{``Solder R13 and R16 when Q2 and Q3 are MOSFETs''}.
+\end{ghichu}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{figures/LEDs.png}
+\caption{Mạch LED trạng thái khóa bằng MOSFET 2N7002}
+\label{fig:sch_leds}
+\end{figure}
 
 \paragraph{Cổng nạp và Test point.} Đầu nối J6 (RESET, MOSI, MISO, SCK, GND) cho phép nạp ISP. Bảy Test point TP1--TP7 được đặt tại các nút quan trọng: +5VA, +12V, +5V, ENC\_A, ENC\_B, +3.3V và OE -- phục vụ trực tiếp việc đo kiểm ở Chương~\ref{ch:lapdat}.
 
